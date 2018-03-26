@@ -28,12 +28,12 @@ seed <- 12358
 set.seed(seed)
 
 # split data into calibration and validation sets
-gsIndex <- createDataPartition(gsdat$CP, p = 4/5, list = F, times = 1)
+gsIndex <- createDataPartition(gsdat$WP, p = 4/5, list = F, times = 1)
 gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$CP
+cp_cal <- gs_cal$WP ## change this to $BP, $CP or $WP
 
 # raster calibration features
 gf_cal <- gs_cal[,11:51] ## grid covariates
@@ -178,7 +178,7 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$CP ## subset validation labels
+cp_val <- gspred$WP ## subset validation labels
 gf_val <- gspred[,54:58] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
@@ -220,10 +220,10 @@ coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(preds)
 gspred <- extract(preds, gsdat)
 gspred <- as.data.frame(cbind(gsdat, gspred))
-write.csv(gsdat, "./Results/TZ_CP_pred.csv", row.names = F) ## write dataframe
+write.csv(gsdat, "./Results/TZ_WP_pred.csv", row.names = F) ## write dataframe
 
 # stacking model labels and features
-cp_all <- gspred$CP ## subset validation labels
+cp_all <- gspred$WP ## subset validation labels
 gf_all <- gspred[,54:58] ## subset validation features
 
 # ROC calculation
@@ -244,7 +244,7 @@ plot(mask, axes=F)
 # Write prediction files --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
-writeRaster(gspreds, filename="./Results/TZ_cppreds_2017.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/TZ_wppreds_2017.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Prediction map widget ---------------------------------------------------
 require(leaflet)
