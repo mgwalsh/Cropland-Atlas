@@ -1,5 +1,5 @@
 # Stacked predictions of Tanzania GeoSurvey observations
-# M. Walsh, October 2017
+# M. Walsh, March 2018
 
 # Required packages
 # install.packages(c("devtools","caret","MASS","randomForest","gbm","nnet","glmnet","plyr","doParallel","dismo")), dependencies=T)
