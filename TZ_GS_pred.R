@@ -1,4 +1,4 @@
-# Stacked predictions of Tanzania GeoSurvey observations
+# Stacked predictions of Tanzania GeoSurvey features
 # M. Walsh, March 2018
 
 # Required packages
@@ -235,7 +235,7 @@ cp_eall <- evaluate(p=cpp[,1], a=cpa[,1]) ## calculate ROC on complete set
 cp_eall
 plot(cp_eall, 'ROC') ## plot ROC curve
 
-# Generate building mask --------------------------------------------------
+# Generate feature mask ---------------------------------------------------
 t <- threshold(cp_eval) ## calculate thresholds based on ROC
 r <- matrix(c(0, t[,2], 0, t[,2], 1, 1), ncol=3, byrow = T) ## set threshold value <spec_sens>
 mask <- reclassify(1-st.pred, r) ## reclassify stacked predictions
