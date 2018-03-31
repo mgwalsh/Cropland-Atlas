@@ -100,9 +100,9 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
+tg <- expand.grid(mtry = seq(1, 5, by=1)) ## model tuning steps
 
 # model training
-tg <- expand.grid(mtry=seq(1, 10, by=1))
 rf <- train(gf_cal, cp_cal,
             preProc = c("center","scale"),
             method = "rf",
@@ -151,11 +151,13 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
+tg <- expand.grid(size = seq(5, 11, by=2), decay = c(0.001, 0.01, 0.1)) ## model tuning steps
 
 # model training
 nn <- train(gf_cal, cp_cal, 
             method = "nnet",
             preProc = c("center","scale"), 
+            tuneGrid = tg,
             trControl = tc,
             metric ="ROC")
 
