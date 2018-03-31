@@ -100,7 +100,7 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
-tg <- expand.grid(mtry = seq(1, 5, by=1)) ## model tuning steps
+tg <- expand.grid(mtry = seq(1,5, by=1)) ## model tuning steps
 
 # model training
 rf <- train(gf_cal, cp_cal,
@@ -127,6 +127,7 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T, summaryFunction = twoClassSummary,
                    allowParallel = T)
+tg <- 
 
 # model training
 gb <- train(gf_cal, cp_cal, 
