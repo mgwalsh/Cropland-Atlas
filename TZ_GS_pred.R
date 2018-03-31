@@ -1,4 +1,4 @@
-# Stacked predictions of Tanzania GeoSurvey features
+# Stacked predictions of Tanzania GeoSurvey observations
 # M. Walsh, March 2018
 
 # Required packages
