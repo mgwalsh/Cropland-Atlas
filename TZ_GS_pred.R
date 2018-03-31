@@ -33,14 +33,14 @@ gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$WP ## change this to $BP, $CP or $WP
+cp_cal <- gs_cal$CP ## change this to $BP, $CP or $WP
 
 # raster calibration features
-gf_cal <- gs_cal[,11:51] ## grid covariates
+gf_cal <- gs_cal[,11:52] ## grid covariates
 
 # Central place theory model <glm> -----------------------------------------
 # select central place variables
-gf_cpv <- gs_cal[,18:29] ## central-place covariates
+gf_cpv <- gs_cal[,18:28] ## central-place covariates
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -178,7 +178,7 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$WP ## subset validation labels
+cp_val <- gspred$CP ## change this to $BP, $CP or $WP
 gf_val <- gspred[,54:58] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
@@ -223,7 +223,7 @@ gspred <- as.data.frame(cbind(gsdat, gspred))
 write.csv(gsdat, "./Results/TZ_WP_pred.csv", row.names = F) ## write dataframe
 
 # stacking model labels and features
-cp_all <- gspred$WP ## subset validation labels
+cp_all <- gspred$CP ## change this to $BP, $CP or $WP
 gf_all <- gspred[,54:58] ## subset validation features
 
 # ROC calculation
@@ -244,4 +244,4 @@ plot(mask, axes=F)
 # Write prediction files --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
-writeRaster(gspreds, filename="./Results/TZ_wppreds_2017.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/TZ_cppreds_2017.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
