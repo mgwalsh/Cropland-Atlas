@@ -33,7 +33,7 @@ gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$CP ## change this to $BP, $CP or $WP
+cp_cal <- gs_cal$CP ## change this to $BP, $CP, $WP or $BIC
 
 # raster calibration features
 gf_cal <- gs_cal[,11:52] ## grid covariates
@@ -178,7 +178,7 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$CP ## change this to $BP, $CP or $WP
+cp_val <- gspred$CP ## change this to $BP, $CP, $WP or $BIC
 gf_val <- gspred[,54:58] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
