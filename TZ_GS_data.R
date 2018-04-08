@@ -18,10 +18,17 @@ dir.create("TZ_GS250", showWarnings = F)
 setwd("./TZ_GS250")
 
 # download GeoSurvey data
-download("https://www.dropbox.com/s/57kuxbkm5sv092a/TZ_geos_2017.csv.zip?raw=1", "TZ_geos_2017.csv.zip", mode = "wb")
+# GeoSurvey 2017 (baseline)
+download("https://www.dropbox.com/s/94d68wrq93dj7te/TZ_geos_2017.csv.zip?raw=1", "TZ_geos_2017.csv.zip", mode = "wb")
 unzip("TZ_geos_2017.csv.zip", overwrite = T)
-geos <- read.table("TZ_geos_2017.csv", header = T, sep = ",")
-geos$BIC <- as.factor(ifelse(geos$CP == "Y" & geos$BP == "Y", "Y", "N")) ## identifies croplands with buildings
+geos17 <- read.table("TZ_geos_2017.csv", header = T, sep = ",")
+geos17$BIC <- as.factor(ifelse(geos$CP == "Y" & geos$BP == "Y", "Y", "N")) ## identifies croplands with buildings
+
+# expanded cropland-focused GeoSurvey 2018
+download("https://www.dropbox.com/s/xcsqj5kxodogbvm/TZ_geos_2018.csv.zip?raw=1", "TZ_geos_2018.csv.zip", mode = "wb")
+unzip("TZ_geos_2018.csv.zip", overwrite = T)
+geos18 <- read.table("TZ_geos_2018.csv", header = T, sep = ",")
+geos18$BIC <- as.factor(ifelse(geos$CP == "Y" & geos$BP == "Y", "Y", "N")) ## identifies croplands with buildings
 
 # download GADM-L3 shapefile (courtesy: http://www.gadm.org)
 download("https://www.dropbox.com/s/bhefsc8u120uqwp/TZA_adm3.zip?raw=1", "TZA_adm3.zip", mode = "wb")
