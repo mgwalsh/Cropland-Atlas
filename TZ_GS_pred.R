@@ -28,19 +28,19 @@ seed <- 12358
 set.seed(seed)
 
 # split data into calibration and validation sets
-gsIndex <- createDataPartition(gsdat$WP, p = 4/5, list = F, times = 1)
+gsIndex <- createDataPartition(gsdat$BP, p = 4/5, list = F, times = 1)
 gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$CP ## change this to $BP, $CP, $WP or $BIC
+cp_cal <- gs_cal$BP ## change this to $BP, $CP, $WP or $BIC
 
 # raster calibration features
-gf_cal <- gs_cal[,11:52] ## grid covariates
+gf_cal <- gs_cal[,12:52] ## grid covariates
 
 # Central place theory model <glm> -----------------------------------------
 # select central place variables
-gf_cpv <- gs_cal[,18:28] ## central-place covariates
+gf_cpv <- gs_cal[,19:29] ## central-place covariates
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -127,13 +127,17 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T, summaryFunction = twoClassSummary,
                    allowParallel = T)
-tg <- 
+
+## for initial<gbm> tuning guidelines see @ https://stats.stackexchange.com/questions/25748/what-are-some-useful-guidelines-for-gbm-parameters
+tg <- expand.grid(interaction.depth = seq(2,5, by=1), shrinkage = 0.01, n.trees = seq(101,501, by=50),
+                  n.minobsinnode = 50) ## model tuning steps
 
 # model training
 gb <- train(gf_cal, cp_cal, 
             method = "gbm", 
             preProc = c("center", "scale"),
             trControl = tc,
+            tuneGrid = tg,
             metric = "ROC")
 
 # model outputs & predictions
@@ -152,7 +156,7 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
-tg <- expand.grid(size = seq(5, 11, by=2), decay = c(0.001, 0.01, 0.1)) ## model tuning steps
+tg <- expand.grid(size = seq(2,10, by=2), decay = c(0.001, 0.01, 0.1)) ## model tuning steps
 
 # model training
 nn <- train(gf_cal, cp_cal, 
@@ -181,8 +185,8 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$CP ## change this to $BP, $CP, $WP or $BIC
-gf_val <- gspred[,54:58] ## subset validation features
+cp_val <- gspred$BP ## change this to $BP, $CP, $WP or $BIC
+gf_val <- gspred[,53:57] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -223,7 +227,6 @@ coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(preds)
 gspred <- extract(preds, gsdat)
 gspred <- as.data.frame(cbind(gsdat, gspred))
-write.csv(gsdat, "./Results/TZ_WP_pred.csv", row.names = F) ## write dataframe
 
 # stacking model labels and features
 cp_all <- gspred$CP ## change this to $BP, $CP or $WP
@@ -244,7 +247,13 @@ r <- matrix(c(0, t[,2], 0, t[,2], 1, 1), ncol=3, byrow = T) ## set threshold val
 mask <- reclassify(1-st.pred, r) ## reclassify stacked predictions
 plot(mask, axes=F)
 
-# Write prediction files --------------------------------------------------
+# Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
-writeRaster(gspreds, filename="./Results/TZ_cppreds_2017.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/TZ_bppreds_2017.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+
+# Write output data frame -------------------------------------------------
+gspre <- extract(gspreds, gsdat)
+gsout <- as.data.frame(cbind(gsdat, gspre))
+write.csv(gsout, "./Results/TZ_gsout.csv", row.names = F)
+
