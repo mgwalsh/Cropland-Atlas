@@ -22,8 +22,8 @@ setwd("./TZ_GS250")
 # GeoSurvey 2017 (baseline)
 download("https://www.dropbox.com/s/94d68wrq93dj7te/TZ_geos_2017.csv.zip?raw=1", "TZ_geos_2017.csv.zip", mode = "wb")
 unzip("TZ_geos_2017.csv.zip", overwrite = T)
-geos17 <- read.table("TZ_geos_2017.csv", header = T, sep = ",")
-geos17$BIC <- as.factor(ifelse(geos17$CP == "Y" & geos17$BP == "Y", "Y", "N")) ## identifies croplands with buildings
+geos <- read.table("TZ_geos_2017.csv", header = T, sep = ",")
+geos$BIC <- as.factor(ifelse(geos$CP == "Y" & geos$BP == "Y", "Y", "N")) ## identifies croplands with buildings
 
 # cropland-focused GeoSurvey 2018
 download("https://www.dropbox.com/s/0x4y4j6ifqidmhh/TZ_geos_2018.csv.zip?raw=1", "TZ_geos_2018.csv.zip", mode = "wb")
@@ -43,10 +43,6 @@ glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 
 # Data setup ---------------------------------------------------------------
-# combine 2017 & 2018 GeoSurveys
-gs <- geos18[c(1,4:9,13)]
-geos <- rbind(geos17, gs)
-
 # attach GADM-L3 admin unit names from shape
 coordinates(geos) <- ~lon+lat
 projection(geos) <- projection(shape)
