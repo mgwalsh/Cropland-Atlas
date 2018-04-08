@@ -26,9 +26,9 @@ geos17 <- read.table("TZ_geos_2017.csv", header = T, sep = ",")
 geos17$BIC <- as.factor(ifelse(geos17$CP == "Y" & geos17$BP == "Y", "Y", "N")) ## identifies croplands with buildings
 
 # expanded cropland-focused GeoSurvey 2018
-download("https://www.dropbox.com/s/xcsqj5kxodogbvm/TZ_geos_2018.csv.zip?raw=1", "TZ_geos_2018.csv.zip", mode = "wb")
+download("https://www.dropbox.com/s/rwf45ycqu1jui5a/TZ_geos_2018.csv.zip?raw=1", "TZ_geos_2018.csv.zip", mode = "wb")
 unzip("TZ_geos_2018.csv.zip", overwrite = T)
-geos18 <- read.table("TZ_geos_2018.csv", header = T, sep = ",")
+geos18 <- read.table("TZ_geos_2018.csv", header = T, sep = ",", as.factor=F)
 geos18$BIC <- as.factor(ifelse(geos18$CP == "Y" & geos18$BP == "Y", "Y", "N")) ## identifies croplands with buildings
 
 # download GADM-L3 shapefile (courtesy: http://www.gadm.org)
