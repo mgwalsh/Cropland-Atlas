@@ -2,10 +2,11 @@
 # M. Walsh, March 2018
 
 # Required packages
-# install.packages(c("downloader","rgdal","raster","leaflet","htmlwidgets","wordcloud")), dependencies=TRUE)
+# install.packages(c("downloader","rgdal","jsonlite","raster","leaflet","htmlwidgets","wordcloud")), dependencies=TRUE)
 suppressPackageStartupMessages({
   require(downloader)
   require(rgdal)
+  require(jsonlite)
   require(raster)
   require(leaflet)
   require(htmlwidgets)
@@ -22,26 +23,28 @@ setwd("./TZ_GS250")
 download("https://www.dropbox.com/s/94d68wrq93dj7te/TZ_geos_2017.csv.zip?raw=1", "TZ_geos_2017.csv.zip", mode = "wb")
 unzip("TZ_geos_2017.csv.zip", overwrite = T)
 geos17 <- read.table("TZ_geos_2017.csv", header = T, sep = ",")
-geos17$BIC <- as.factor(ifelse(geos$CP == "Y" & geos$BP == "Y", "Y", "N")) ## identifies croplands with buildings
+geos17$BIC <- as.factor(ifelse(geos17$CP == "Y" & geos17$BP == "Y", "Y", "N")) ## identifies croplands with buildings
 
 # expanded cropland-focused GeoSurvey 2018
 download("https://www.dropbox.com/s/xcsqj5kxodogbvm/TZ_geos_2018.csv.zip?raw=1", "TZ_geos_2018.csv.zip", mode = "wb")
 unzip("TZ_geos_2018.csv.zip", overwrite = T)
 geos18 <- read.table("TZ_geos_2018.csv", header = T, sep = ",")
-geos18$BIC <- as.factor(ifelse(geos$CP == "Y" & geos$BP == "Y", "Y", "N")) ## identifies croplands with buildings
+geos18$BIC <- as.factor(ifelse(geos18$CP == "Y" & geos18$BP == "Y", "Y", "N")) ## identifies croplands with buildings
 
 # download GADM-L3 shapefile (courtesy: http://www.gadm.org)
 download("https://www.dropbox.com/s/bhefsc8u120uqwp/TZA_adm3.zip?raw=1", "TZA_adm3.zip", mode = "wb")
 unzip("TZA_adm3.zip", overwrite = T)
 shape <- shapefile("TZA_adm3.shp")
 
-# download Tanzania Gtifs and stack in raster (note this is a big 850+ Mb download)
+# download raster stack (note this is a big 860+ Mb download)
 download("https://www.dropbox.com/s/pshrtvjf7navegu/TZ_250m_2017.zip?raw=1", "TZ_250m_2017.zip", mode = "wb")
 unzip("TZ_250m_2017.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 
 # Data setup ---------------------------------------------------------------
+# combine 2017 & 2018 GeoSurveys
+
 # attach GADM-L3 admin unit names from shape
 coordinates(geos) <- ~lon+lat
 projection(geos) <- projection(shape)
