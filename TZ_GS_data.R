@@ -53,7 +53,7 @@ projection(geos) <- projection(shape)
 gadm <- geos %over% shape
 geos <- as.data.frame(geos)
 geos <- cbind(gadm[ ,c(5,7,9)], geos)
-colnames(geos) <- c("region", "district", "ward","survey", "observer", "lat", "lon", "BP", "CP", "WP", "BIC")
+colnames(geos) <- c("region", "district", "ward", "survey", "observer", "lat", "lon", "BP", "CP", "WP", "BIC")
 
 # project GeoSurvey coords to grid CRS
 geos.proj <- as.data.frame(project(cbind(geos$lon, geos$lat), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
