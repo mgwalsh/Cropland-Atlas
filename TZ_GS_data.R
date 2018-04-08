@@ -25,10 +25,10 @@ unzip("TZ_geos_2017.csv.zip", overwrite = T)
 geos17 <- read.table("TZ_geos_2017.csv", header = T, sep = ",")
 geos17$BIC <- as.factor(ifelse(geos17$CP == "Y" & geos17$BP == "Y", "Y", "N")) ## identifies croplands with buildings
 
-# expanded cropland-focused GeoSurvey 2018
-download("https://www.dropbox.com/s/rwf45ycqu1jui5a/TZ_geos_2018.csv.zip?raw=1", "TZ_geos_2018.csv.zip", mode = "wb")
+# cropland-focused GeoSurvey 2018
+download("https://www.dropbox.com/s/0x4y4j6ifqidmhh/TZ_geos_2018.csv.zip?raw=1", "TZ_geos_2018.csv.zip", mode = "wb")
 unzip("TZ_geos_2018.csv.zip", overwrite = T)
-geos18 <- read.table("TZ_geos_2018.csv", header = T, sep = ",", as.factor=F)
+geos18 <- read.table("TZ_geos_2018.csv", header = T, sep = ",")
 geos18$BIC <- as.factor(ifelse(geos18$CP == "Y" & geos18$BP == "Y", "Y", "N")) ## identifies croplands with buildings
 
 # download GADM-L3 shapefile (courtesy: http://www.gadm.org)
@@ -44,6 +44,8 @@ grids <- stack(glist)
 
 # Data setup ---------------------------------------------------------------
 # combine 2017 & 2018 GeoSurveys
+gs <- geos18[c(1,4:9,13)]
+geos <- rbind(geos17, gs)
 
 # attach GADM-L3 admin unit names from shape
 coordinates(geos) <- ~lon+lat
@@ -51,7 +53,7 @@ projection(geos) <- projection(shape)
 gadm <- geos %over% shape
 geos <- as.data.frame(geos)
 geos <- cbind(gadm[ ,c(5,7,9)], geos)
-colnames(geos) <- c("Region", "District", "Ward", "Observer", "lat", "lon", "BP", "CP", "WP", "BIC")
+colnames(geos) <- c("region", "district", "ward","survey", "observer", "lat", "lon", "BP", "CP", "WP", "BIC")
 
 # project GeoSurvey coords to grid CRS
 geos.proj <- as.data.frame(project(cbind(geos$lon, geos$lat), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
@@ -65,7 +67,7 @@ geosgrid <- extract(grids, geos)
 gsdat <- as.data.frame(cbind(geos, geosgrid)) 
 gsdat <- na.omit(gsdat) ## includes only complete cases
 gsdat <- gsdat[!duplicated(gsdat), ] ## removes any duplicates 
-gsdat$user <- sub("@.*", "", as.character(gsdat$Observer)) ## shortens observer ID's
+gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens observer ID's
 
 # Write output file -------------------------------------------------------
 dir.create("Results", showWarnings = F)
@@ -82,6 +84,6 @@ w ## plot widget
 saveWidget(w, 'TZ_GS.html', selfcontained = T)
 
 # GeoSurvey contributions -------------------------------------------------
-gscon <- as.data.frame(table(gsdat$user))
+gscon <- as.data.frame(table(gsdat$observer))
 set.seed(1235813)
 wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(3,0.1), random.order = T)
