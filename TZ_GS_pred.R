@@ -252,3 +252,7 @@ gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
 writeRaster(gspreds, filename="./Results/TZ_cppreds_2017.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
+# Write output data frame -------------------------------------------------
+gspre <- extract(gspreds, gsdat)
+gsout <- as.data.frame(cbind(gsdat, gspre))
+write.csv(gsout, "./Results/TZ_gsout.csv", row.names = F)
