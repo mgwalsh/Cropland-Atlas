@@ -42,7 +42,7 @@ unzip("TZ_250m_2017.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 
-# Data setup ---------------------------------------------------------------
+# Baseline data setup -----------------------------------------------------
 # attach GADM-L3 admin unit names from shape
 coordinates(geos) <- ~lon+lat
 projection(geos) <- projection(shape)
@@ -65,9 +65,32 @@ gsdat <- na.omit(gsdat) ## includes only complete cases
 gsdat <- gsdat[!duplicated(gsdat), ] ## removes any duplicates 
 gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens observer ID's
 
-# Write output file -------------------------------------------------------
+# 2018 cropland survey data setup -----------------------------------------
+# attach GADM-L3 admin unit names from shape
+coordinates(geos18) <- ~lon+lat
+projection(geos18) <- projection(shape)
+gadm <- geos18 %over% shape
+geos18 <- as.data.frame(geos18)
+geos18 <- cbind(gadm[ ,c(5,7,9)], geos18)
+colnames(geos18) <- c("region","district","ward","survey","time","id","observer","lat","lon","BP","CP","WP","rice","bloc","cgrid","BIC")
+
+# project GeoSurvey coords to grid CRS
+geos18.proj <- as.data.frame(project(cbind(geos18$lon, geos18$lat), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
+colnames(geos18.proj) <- c("x","y")
+geos18 <- cbind(geos18, geos18.proj)
+coordinates(geos18) <- ~x+y
+projection(geos18) <- projection(grids)
+
+# extract gridded variables at GeoSurvey locations
+geosgrid <- extract(grids, geos18)
+gsdat18 <- as.data.frame(cbind(geos18, geosgrid)) 
+gsdat18 <- gsdat18[!duplicated(gsdat18), ] ## removes any duplicates 
+gsdat18$observer <- sub("@.*", "", as.character(gsdat18$observer)) ## shortens observer ID's
+
+# Write output files ------------------------------------------------------
 dir.create("Results", showWarnings = F)
-write.csv(gsdat, "./Results/TZ_gsdat.csv", row.names = F)
+write.csv(gsdat, "./Results/TZ_gsdat.csv", row.names = F) ## baseline
+write.csv(gsdat18, "./Results/TZ_gsdat18.csv", row.names = F) ## 2018 cropland GS
 
 # GeoSurvey map widget ----------------------------------------------------
 # render map
