@@ -26,6 +26,7 @@ geos <- read.table("TZ_geos_2017.csv", header = T, sep = ",")
 geos$BIC <- as.factor(ifelse(geos$CP == "Y" & geos$BP == "Y", "Y", "N")) ## identifies croplands with buildings
 
 # cropland-focused GeoSurvey 2018
+# see sampling frame @ https://github.com/mgwalsh/Sampling/blob/master/TZ_GS_sample.R
 download("https://www.dropbox.com/s/0x4y4j6ifqidmhh/TZ_geos_2018.csv.zip?raw=1", "TZ_geos_2018.csv.zip", mode = "wb")
 unzip("TZ_geos_2018.csv.zip", overwrite = T)
 geos18 <- read.table("TZ_geos_2018.csv", header = T, sep = ",")
@@ -98,9 +99,7 @@ w <- leaflet() %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addCircleMarkers(gsdat$lon, gsdat$lat, clusterOptions = markerClusterOptions())
 w ## plot widget 
-
-# save widget
-saveWidget(w, 'TZ_GS.html', selfcontained = T)
+saveWidget(w, 'TZ_GS.html', selfcontained = T) ## save widget
 
 # GeoSurvey contributions -------------------------------------------------
 # Baseline survey
