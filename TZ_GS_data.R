@@ -103,6 +103,13 @@ w ## plot widget
 saveWidget(w, 'TZ_GS.html', selfcontained = T)
 
 # GeoSurvey contributions -------------------------------------------------
+# Baseline survey
 gscon <- as.data.frame(table(gsdat$observer))
 set.seed(1235813)
 wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(3,0.1), random.order = T)
+
+# 2018 cropland survey
+gscon18 <- as.data.frame(table(gsdat18$observer))
+set.seed(1235813)
+wordcloud(gscon18$Var1, freq = gscon18$Freq, scale = c(3,0.1), random.order = T)
+
