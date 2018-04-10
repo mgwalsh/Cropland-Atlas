@@ -1,4 +1,4 @@
-# Tanzania GeoSurvey 250m resolution data setup 
+# 2017 & 2018 Tanzania GeoSurvey 250m resolution data setups
 # M. Walsh, March 2018
 
 # Required packages
@@ -74,6 +74,23 @@ gadm <- geos18 %over% shape
 geos18 <- as.data.frame(geos18)
 geos18 <- cbind(gadm[ ,c(5,7,9)], geos18)
 colnames(geos18) <- c("region","district","ward","survey","time","id","observer","lat","lon","BP","CP","WP","rice","bloc","cgrid","BIC")
+
+# Count number of buildings per quadrat -----------------------------------
+bp <- geos18[which(geos$BP == "Y"), ] ## identify quadrats with buildings
+bp$bloc <- as.character(bp$bloc)
+
+# Counting tagged building locations from quadrats with buildings
+n <- rep(NA, nrow(bp))
+for(i in 1:nrow(bp)) {
+  t <- fromJSON(bp$bloc[i])
+  n[i] <- nrow(t$features)
+}
+n ## vector of number of buildings per quadrats with buildings
+ba <- geos18[which(geos$BP == "N"), ]
+ba$n <- 0
+bp <- cbind(bp, n)
+geos18 <- rbind(ba, bp)
+geos18 <- geos18[order(geos18$id),] ## sort in original sample order
 
 # project GeoSurvey coords to grid CRS
 geos18.proj <- as.data.frame(project(cbind(geos18$lon, geos18$lat), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
