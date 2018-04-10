@@ -43,7 +43,7 @@ unzip("TZ_250m_2017.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 
-# Baseline data setup -----------------------------------------------------
+# 2017 baseline data setup ------------------------------------------------
 # attach GADM-L3 admin unit names from shape
 coordinates(geos) <- ~lon+lat
 projection(geos) <- projection(shape)
@@ -102,7 +102,7 @@ w ## plot widget
 saveWidget(w, 'TZ_GS.html', selfcontained = T) ## save widget
 
 # GeoSurvey contributions -------------------------------------------------
-# Baseline survey
+# 2017 baseline survey
 gscon <- as.data.frame(table(gsdat$observer))
 set.seed(1235813)
 wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(3,0.1), random.order = T)
