@@ -105,9 +105,9 @@ gsdat18 <- as.data.frame(cbind(geos18, geosgrid))
 gsdat18 <- gsdat18[!duplicated(gsdat18), ] ## removes any duplicates 
 gsdat18$observer <- sub("@.*", "", as.character(gsdat18$observer)) ## shortens observer ID's
 
-# Write output files ------------------------------------------------------
+# Write data frames -------------------------------------------------------
 dir.create("Results", showWarnings = F)
-write.csv(gsdat, "./Results/TZ_gsdat.csv", row.names = F) ## baseline
+write.csv(gsdat, "./Results/TZ_gsdat17.csv", row.names = F) ## 2017 baseline
 write.csv(gsdat18, "./Results/TZ_gsdat18.csv", row.names = F) ## 2018 cropland GS
 
 # GeoSurvey map widget ----------------------------------------------------
