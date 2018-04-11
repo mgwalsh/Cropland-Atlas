@@ -76,7 +76,7 @@ geos18 <- cbind(gadm[ ,c(5,7,9)], geos18)
 colnames(geos18) <- c("region","district","ward","survey","time","id","observer","lat","lon","BP","CP","WP","rice","bloc","cgrid","BIC")
 
 # Count number of buildings per quadrat -----------------------------------
-bp <- geos18[which(geos$BP == "Y"), ] ## identify quadrats with buildings
+bp <- geos18[which(geos18$BP == "Y"), ] ## identify quadrats with buildings
 bp$bloc <- as.character(bp$bloc)
 
 # Counting tagged building locations from quadrats with buildings
@@ -86,7 +86,7 @@ for(i in 1:nrow(bp)) {
   n[i] <- nrow(t$features)
 }
 n ## vector of number of buildings per quadrats with buildings
-ba <- geos18[which(geos$BP == "N"), ]
+ba <- geos18[which(geos18$BP == "N"), ]
 ba$n <- 0
 bp <- cbind(bp, n)
 geos18 <- rbind(ba, bp)
