@@ -31,13 +31,13 @@ download("https://www.dropbox.com/s/bhefsc8u120uqwp/TZA_adm3.zip?raw=1", "TZA_ad
 unzip("TZA_adm3.zip", overwrite = T)
 shape <- shapefile("TZA_adm3.shp")
 
-# download raster stack (note this is a big 860+ Mb download)
+# download raster stack (note this is a big 1+ Gb download)
 download("https://www.dropbox.com/s/y1ht9tazxqvsggp/TZ_250m_2018.zip?raw=1", "TZ_250m_2018.zip", mode = "wb")
 unzip("TZ_250m_2018.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 
-# 2018 cropland survey data setup -----------------------------------------
+# Data setup --------------------------------------------------------------
 # attach GADM-L3 admin unit names from shape
 coordinates(geos) <- ~lon+lat
 projection(geos) <- projection(shape)
@@ -86,16 +86,10 @@ w <- leaflet() %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addCircleMarkers(gsdat$lon, gsdat$lat, clusterOptions = markerClusterOptions())
 w ## plot widget 
-saveWidget(w, 'TZ_GS.html', selfcontained = T) ## save widget
+saveWidget(w, 'TZ_GS18.html', selfcontained = T) ## save widget
 
 # GeoSurvey contributions -------------------------------------------------
-# 2017 baseline survey
 gscon <- as.data.frame(table(gsdat$observer))
 set.seed(1235813)
 wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(3,0.1), random.order = T)
-
-# 2018 cropland survey
-gscon18 <- as.data.frame(table(gsdat18$observer))
-set.seed(1235813)
-wordcloud(gscon18$Var1, freq = gscon18$Freq, scale = c(3,0.1), random.order = T)
 
