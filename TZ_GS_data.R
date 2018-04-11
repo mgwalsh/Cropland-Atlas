@@ -62,7 +62,6 @@ gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens obser
 # Write data frame --------------------------------------------------------
 dir.create("Results", showWarnings = F)
 write.csv(gsdat, "./Results/TZ_gsdat17.csv", row.names = F) ## 2017 baseline
-write.csv(gsdat18, "./Results/TZ_gsdat18.csv", row.names = F) ## 2018 cropland GS
 
 # GeoSurvey map widget ----------------------------------------------------
 # render map
