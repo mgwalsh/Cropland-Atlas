@@ -1,4 +1,4 @@
-# Tanzania GeoSurvey 250m resolution data setups
+# Tanzania GeoSurvey 250m resolution data, baseline setup
 # M. Walsh, March 2018
 
 # Required packages
@@ -73,7 +73,7 @@ w ## plot widget
 saveWidget(w, 'TZ_GS.html', selfcontained = T) ## save widget
 
 # GeoSurvey contributions -------------------------------------------------
-# 2017 baseline survey
+# Baseline survey
 gscon <- as.data.frame(table(gsdat$observer))
 set.seed(1235813)
 wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(3,0.1), random.order = T)
