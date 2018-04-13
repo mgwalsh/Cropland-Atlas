@@ -219,36 +219,16 @@ cpa <- subset(cp_val, cp_val=="N", select=c(Y))
 cp_eval <- evaluate(p=cpp[,1], a=cpa[,1]) ## calculate ROC's on test set
 plot(cp_eval, 'ROC') ## plot ROC curve
 
-# complete-set ROC
-# extract model predictions
-coordinates(gsdat) <- ~x+y
-projection(gsdat) <- projection(preds)
-gspred <- extract(preds, gsdat)
-gspred <- as.data.frame(cbind(gsdat, gspred))
-
-# stacking model labels and features
-cp_all <- gspred$rice
-gf_all <- gspred[,62:66] ## subset validation features
-
-# ROC calculation
-cp_pre <- predict(st, gf_all, type="prob")
-cp_all <- cbind(cp_all, cp_pre)
-cpp <- subset(cp_all, cp_all=="Y", select=c(Y))
-cpa <- subset(cp_all, cp_all=="N", select=c(Y))
-cp_eall <- evaluate(p=cpp[,1], a=cpa[,1]) ## calculate ROC on complete set
-cp_eall
-plot(cp_eall, 'ROC') ## plot ROC curve
-
 # Generate feature mask ---------------------------------------------------
 t <- threshold(cp_eval) ## calculate thresholds based on ROC
 r <- matrix(c(0, t[,1], 0, t[,1], 1, 1), ncol=3, byrow = T) ## set threshold value <kappa>
 mask <- reclassify(1-st.pred, r) ## reclassify stacked predictions
-plot(mask, axes=F)
+plot(mask, axes=F, legend=F)
 
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
-writeRaster(gspreds, filename="./Results/TZ_ricepreds_2017.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/TZ_ricepreds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
 gspre <- extract(gspreds, gsdat)
