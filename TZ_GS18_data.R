@@ -1,4 +1,4 @@
-# Tanzania GeoSurvey 250m resolution, 2018 cropland data setup
+# Tanzania GeoSurvey 250m resolution cropland data setup
 # M. Walsh, April 2018
 
 # Required packages
@@ -19,7 +19,6 @@ dir.create("TZ_GS18", showWarnings = F)
 setwd("./TZ_GS18")
 
 # download GeoSurvey data
-# cropland-focused GeoSurvey 2018
 # see sampling frame @ https://github.com/mgwalsh/Sampling/blob/master/TZ_GS_sample.R
 download("https://www.dropbox.com/s/0x4y4j6ifqidmhh/TZ_geos_2018.csv.zip?raw=1", "TZ_geos_2018.csv.zip", mode = "wb")
 unzip("TZ_geos_2018.csv.zip", overwrite = T)
