@@ -86,7 +86,6 @@ plot(GBD~bcount, gsdat, xlab="GeoSurvey building counts", ylab="DigitalGlobe bui
 abline(c(0,1))
 
 # GeoSurvey map widget ----------------------------------------------------
-# render map
 w <- leaflet() %>% 
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addCircleMarkers(gsdat$lon, gsdat$lat, clusterOptions = markerClusterOptions())
