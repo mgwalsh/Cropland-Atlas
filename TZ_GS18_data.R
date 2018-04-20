@@ -50,15 +50,15 @@ bp <- geos[which(geos$BP == "Y"), ] ## identify quadrats with buildings
 bp$bloc <- as.character(bp$bloc)
 
 # Counting tagged building locations from quadrats with buildings
-n <- rep(NA, nrow(bp))
+bcount <- rep(NA, nrow(bp))
 for(i in 1:nrow(bp)) {
   t <- fromJSON(bp$bloc[i])
-  n[i] <- nrow(t$features)
+  bcount[i] <- nrow(t$features)
 }
-n ## vector of number of buildings per quadrats with buildings
+bcount ## vector of number of buildings per quadrats with buildings
 ba <- geos[which(geos$BP == "N"), ]
-ba$n <- 0
-bp <- cbind(bp, n)
+ba$bcount <- 0
+bp <- cbind(bp, bcount)
 geos <- rbind(ba, bp)
 geos <- geos[order(geos$id),] ## sort in original sample order
 
