@@ -26,12 +26,12 @@ seed <- 12358
 set.seed(seed)
 
 # split data into calibration and validation sets
-gsIndex <- createDataPartition(gsdat$rice, p = 4/5, list = F, times = 1)
+gsIndex <- createDataPartition(gsdat$BIC, p = 4/5, list = F, times = 1)
 gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$rice
+cp_cal <- gs_cal$BIC
 
 # raster calibration features
 gf_cal <- gs_cal[,18:61]
@@ -183,8 +183,8 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$rice 
-gf_val <- gspred[,62:66] ## subset validation features
+cp_val <- gspred$BIC 
+gf_val <- gspred[,63:67] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -228,9 +228,9 @@ plot(mask, axes=F, legend=F)
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
-writeRaster(gspreds, filename="./Results/TZ_ricepreds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/TZ_bicepreds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-write.csv(gsout, "./Results/TZ_riceout.csv", row.names = F)
+write.csv(gsout, "./Results/TZ_bicout.csv", row.names = F)
