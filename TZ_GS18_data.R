@@ -80,6 +80,11 @@ gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens obser
 dir.create("Results", showWarnings = F)
 write.csv(gsdat, "./Results/TZ_gsdat18.csv", row.names = F)
 
+# Plots -------------------------------------------------------------------
+# e.g Digital Globe vs GeoSurvey building counts
+plot(GBD~bcount, gsdat, xlab="GeoSurvey building counts", ylab="DigitalGlobe building counts", xlim=c(0,350), ylim=c(0,350))
+abline(c(0,1))
+
 # GeoSurvey map widget ----------------------------------------------------
 # render map
 w <- leaflet() %>% 
