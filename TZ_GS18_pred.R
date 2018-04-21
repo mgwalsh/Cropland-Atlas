@@ -231,6 +231,9 @@ names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
 writeRaster(gspreds, filename="./Results/TZ_bicpreds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
+coordinates(gsdat) <- ~x+y
+projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 write.csv(gsout, "./Results/TZ_bicout.csv", row.names = F)
+
