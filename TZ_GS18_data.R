@@ -80,21 +80,6 @@ gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens obser
 dir.create("Results", showWarnings = F)
 write.csv(gsdat, "./Results/TZ_gsdat18.csv", row.names = F)
 
-# Plots -------------------------------------------------------------------
-# Quantile regression of building counts from GeoSurvey and DigitalGlobe
-require(quantreg)
-fitl <- rq(bcount ~ GBD, tau = 0.05, data = gsdat)
-coef(fitl)
-fith <- rq(bcount ~ GBD, tau = 0.95, data = gsdat)
-coef(fith)
-
-# 90% CI quantiles
-par(pty="s")
-plot(bcount~GBD, gsdat, xlab="DigitalGlobe building count", ylab="GeoSurvey building count", xlim=c(0,350), ylim=c(0,350), cex.lab=1.3)
-lines(gsdat$GBD, fitl$fitted.values, col = "blue")
-lines(gsdat$GBD, fith$fitted.values, col = "red")
-abline(c(0,1))
-
 # GeoSurvey map widget ----------------------------------------------------
 w <- leaflet() %>% 
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
