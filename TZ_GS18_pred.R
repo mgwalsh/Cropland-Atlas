@@ -26,15 +26,15 @@ seed <- 12358
 set.seed(seed)
 
 # split data into calibration and validation sets
-gsIndex <- createDataPartition(gsdat$BIC, p = 4/5, list = F, times = 1)
+gsIndex <- createDataPartition(gsdat$rice, p = 4/5, list = F, times = 1)
 gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$BIC ## change this to include other dependent variables e.g, $CP, $BP, $WP, $rice
+cp_cal <- gs_cal$rice ## change this to include other dependent variables e.g, $CP, $BP, $WP, $BIC
 
 # raster calibration features
-gf_cal <- gs_cal[,18:61]
+gf_cal <- gs_cal[,18:62]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
@@ -127,7 +127,7 @@ tc <- trainControl(method = "cv", classProbs = T, summaryFunction = twoClassSumm
                    allowParallel = T)
 
 ## for initial <gbm> tuning guidelines see @ https://stats.stackexchange.com/questions/25748/what-are-some-useful-guidelines-for-gbm-parameters
-tg <- expand.grid(interaction.depth = seq(1,5, by=1), shrinkage = 0.01, n.trees = seq(101,501, by=50),
+tg <- expand.grid(interaction.depth = seq(6,14, by=2), shrinkage = 0.01, n.trees = 501,
                   n.minobsinnode = 25) ## model tuning steps
 
 # model training
@@ -154,7 +154,7 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
-tg <- expand.grid(size = seq(2,10, by=2), decay = c(0.001, 0.01, 0.1)) ## model tuning steps
+tg <- expand.grid(size = seq(2,10, by=2), decay = 0.01) ## model tuning steps
 
 # model training
 nn <- train(gf_cal, cp_cal, 
@@ -183,7 +183,7 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$BIC ## change this to include other dependent variables e.g, $CP, $BP, $WP, $rice
+cp_val <- gspred$rice ## change this to include other dependent variables e.g, $CP, $BP, $WP, $BIC
 gf_val <- gspred[,63:67] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
