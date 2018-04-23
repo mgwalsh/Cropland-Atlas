@@ -31,7 +31,7 @@ gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$rice ## change this to include other dependent variables e.g, $CP, $BP, $WP, $BIC
+cp_cal <- gs_cal$rice ## change this to include other dependent variables e.g, $BP, $WP, $BIC
 
 # raster calibration features
 gf_cal <- gs_cal[,18:62]
@@ -154,7 +154,7 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
-tg <- expand.grid(size = seq(2,10, by=2), decay = 0.01) ## model tuning steps
+tg <- expand.grid(size = seq(6,14, by=2), decay = 0.01) ## model tuning steps
 
 # model training
 nn <- train(gf_cal, cp_cal, 
@@ -183,7 +183,7 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$rice ## change this to include other dependent variables e.g, $CP, $BP, $WP, $BIC
+cp_val <- gspred$rice ## change this to include other dependent variables e.g, $BP, $WP, $BIC
 gf_val <- gspred[,63:67] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
@@ -228,14 +228,14 @@ plot(mask, axes=F, legend=F)
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
-# change this to include other dependent variables e.g, $CP, $BP, $WP, $rice
-writeRaster(gspreds, filename="./Results/TZ_bicpreds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+# change this to include other dependent variables e.g, $BP, $WP, $BIC
+writeRaster(gspreds, filename="./Results/TZ_ricepreds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-# change this to include other dependent variables e.g, $CP, $BP, $WP, $rice
-write.csv(gsout, "./Results/TZ_bicout.csv", row.names = F)
+# change this to include other dependent variables e.g, $BP, $WP, $BIC
+write.csv(gsout, "./Results/TZ_riceout.csv", row.names = F)
 
