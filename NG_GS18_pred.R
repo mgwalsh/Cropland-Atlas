@@ -127,7 +127,7 @@ tc <- trainControl(method = "cv", classProbs = T, summaryFunction = twoClassSumm
                    allowParallel = T)
 
 ## for initial <gbm> tuning guidelines see @ https://stats.stackexchange.com/questions/25748/what-are-some-useful-guidelines-for-gbm-parameters
-tg <- expand.grid(interaction.depth = seq(6,14, by=2), shrinkage = 0.01, n.trees = 501,
+tg <- expand.grid(interaction.depth = seq(4,12, by=2), shrinkage = 0.01, n.trees = 501,
                   n.minobsinnode = 25) ## model tuning steps
 
 # model training
@@ -154,7 +154,7 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
-tg <- expand.grid(size = seq(6,14, by=2), decay = 0.01) ## model tuning steps
+tg <- expand.grid(size = seq(2,10, by=2), decay = 0.01) ## model tuning steps
 
 # model training
 nn <- train(gf_cal, cp_cal, 
@@ -184,7 +184,7 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
 cp_val <- gspred$rice ## change this to include other dependent variables e.g, $BP, $WP, $BIC
-gf_val <- gspred[,63:67] ## subset validation features
+gf_val <- gspred[,55:59] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -229,7 +229,7 @@ plot(mask, axes=F, legend=F)
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
 # change this to include other dependent variables e.g, $BP, $WP, $BIC
-writeRaster(gspreds, filename="./Results/TZ_ricepreds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/NG_ricepreds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
@@ -237,4 +237,5 @@ projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 # change this to include other dependent variables e.g, $BP, $WP, $BIC
-write.csv(gsout, "./Results/TZ_riceout.csv", row.names = F)
+write.csv(gsout, "./Results/NG_riceout.csv", row.names = F)
+
