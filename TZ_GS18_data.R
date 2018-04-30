@@ -45,11 +45,22 @@ geos <- as.data.frame(geos)
 geos <- cbind(gadm[ ,c(5,7,9)], geos)
 colnames(geos) <- c("region","district","ward","survey","time","id","observer","lat","lon","BP","CP","WP","rice","bloc","cgrid","BIC")
 
-# Count number of buildings per quadrat -----------------------------------
+# Coordinates and number of buildings per quadrat -------------------------
 bp <- geos[which(geos$BP == "Y"), ] ## identify quadrats with buildings
 bp$bloc <- as.character(bp$bloc)
 
-# Counting tagged building locations from quadrats with buildings
+# coordinates of tagged building locations from quadrats with buildings
+c <- fromJSON(bp$bloc[1])
+bcoord <- do.call("rbind", c$feature$geometry$coordinates)
+for(i in 2:nrow(bp)) {
+  c <- fromJSON(bp$bloc[i])
+  bcoord_temp <- do.call("rbind", c$feature$geometry$coordinates)
+  bcoord <- rbind(bcoord, bcoord_temp)
+}
+bcoord <- as.data.frame(bcoord) ## vector of coordinates per quadrats with buildings
+colnames(bcoord) <- c("lon","lat")
+
+# number of tagged building locations from quadrats with buildings
 bcount <- rep(NA, nrow(bp))
 for(i in 1:nrow(bp)) {
   t <- fromJSON(bp$bloc[i])
@@ -79,17 +90,18 @@ gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens obser
 
 # Write data frame --------------------------------------------------------
 dir.create("Results", showWarnings = F)
-write.csv(gsdat, "./Results/TZ_gsdat18.csv", row.names = F)
+write.csv(bcoord, "./Results/TZ_bcoord.csv", row.names = F)
+write.csv(gsdat, "./Results/TZ_gsdat.csv", row.names = F)
 
 # GeoSurvey map widget ----------------------------------------------------
 w <- leaflet() %>% 
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
-  addCircleMarkers(gsdat$lon, gsdat$lat, clusterOptions = markerClusterOptions())
+  addCircleMarkers(bcoord$lon, bcoord$lat, clusterOptions = markerClusterOptions())
 w ## plot widget 
 saveWidget(w, 'TZ_GS18.html', selfcontained = T) ## save widget
 
 # GeoSurvey contributions -------------------------------------------------
 gscon <- as.data.frame(table(gsdat$observer))
 set.seed(1235813)
-wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(3,0.1), random.order = T)
+wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(4,0.1), random.order = T)
 
