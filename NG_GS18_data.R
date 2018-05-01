@@ -90,16 +90,18 @@ gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens obser
 
 # Write data frame --------------------------------------------------------
 dir.create("Results", showWarnings = F)
+write.csv(bcoord, "./Results/NG_bcoord.csv", row.names = F)
 write.csv(gsdat, "./Results/NG_gsdat18.csv", row.names = F)
 
 # GeoSurvey map widget ----------------------------------------------------
 w <- leaflet() %>% 
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
-  addCircleMarkers(gsdat$lon, gsdat$lat, clusterOptions = markerClusterOptions())
+  addCircleMarkers(bcoord$lon, bcoord$lat, clusterOptions = markerClusterOptions())
 w ## plot widget 
-saveWidget(w, 'NG_GS18.html', selfcontained = T) ## save widget
+saveWidget(w, 'NG_bcoord.html', selfcontained = T) ## save widget
 
 # GeoSurvey contributions -------------------------------------------------
 gscon <- as.data.frame(table(gsdat$observer))
 set.seed(1235813)
 wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(3,0.1), random.order = T)
+
