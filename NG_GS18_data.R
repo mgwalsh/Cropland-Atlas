@@ -45,11 +45,22 @@ geos <- as.data.frame(geos)
 geos <- cbind(gadm[ ,c(5,7)], geos)
 colnames(geos) <- c("state","lga","time","id","observer","lat","lon","BP","CP","WP","rice","cgrid","bloc","BIC")
 
-# Count number of buildings per quadrat -----------------------------------
+# Coordinates and number of buildings per quadrat -------------------------
 bp <- geos[which(geos$BP == "Y"), ] ## identify quadrats with buildings
 bp$bloc <- as.character(bp$bloc)
 
-# Counting tagged building locations from quadrats with buildings
+# coordinates of tagged building locations from quadrats with buildings
+c <- fromJSON(bp$bloc[1])
+bcoord <- do.call("rbind", c$feature$geometry$coordinates)
+for(i in 2:nrow(bp)) {
+  c <- fromJSON(bp$bloc[i])
+  bcoord_temp <- do.call("rbind", c$feature$geometry$coordinates)
+  bcoord <- rbind(bcoord, bcoord_temp)
+}
+bcoord <- as.data.frame(bcoord) ## vector of coordinates per quadrats with buildings
+colnames(bcoord) <- c("lon","lat")
+
+# number of tagged building locations from quadrats with buildings
 bcount <- rep(NA, nrow(bp))
 for(i in 1:nrow(bp)) {
   t <- fromJSON(bp$bloc[i])
