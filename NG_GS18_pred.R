@@ -34,7 +34,7 @@ gs_val <- gsdat[-gsIndex,]
 cp_cal <- gs_cal$rice ## change this to include other dependent variables e.g, $BP, $WP, $BIC
 
 # raster calibration features
-gf_cal <- gs_cal[,16:54]
+gf_cal <- gs_cal[,16:58]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
