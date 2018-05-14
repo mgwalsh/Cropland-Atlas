@@ -98,7 +98,7 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
-tg <- expand.grid(mtry = seq(1,5, by=1)) ## model tuning steps
+tg <- expand.grid(mtry = seq(1,3, by=1)) ## model tuning steps
 
 # model training
 rf <- train(gf_cal, cp_cal,
@@ -126,8 +126,8 @@ set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T, summaryFunction = twoClassSummary,
                    allowParallel = T)
 
-## for initial <gbm> tuning guidelines see @ https://stats.stackexchange.com/questions/25748/what-are-some-useful-guidelines-for-gbm-parameters
-tg <- expand.grid(interaction.depth = seq(4,12, by=2), shrinkage = 0.01, n.trees = 501,
+# for initial <gbm> tuning guidelines see @ https://stats.stackexchange.com/questions/25748/what-are-some-useful-guidelines-for-gbm-parameters
+tg <- expand.grid(interaction.depth = seq(10,18, by=2), shrinkage = 0.01, n.trees = 501,
                   n.minobsinnode = 25) ## model tuning steps
 
 # model training
@@ -154,7 +154,7 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
-tg <- expand.grid(size = seq(2,10, by=2), decay = 0.01) ## model tuning steps
+tg <- expand.grid(size = seq(1,5, by=1), decay = 0.01) ## model tuning steps
 
 # model training
 nn <- train(gf_cal, cp_cal, 
@@ -184,7 +184,7 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
 cp_val <- gspred$rice ## change this to include other dependent variables e.g, $BP, $WP, $BIC
-gf_val <- gspred[,55:59] ## subset validation features
+gf_val <- gspred[,59:63] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
