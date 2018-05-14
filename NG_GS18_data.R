@@ -96,7 +96,7 @@ write.csv(gsdat, "./Results/NG_gsdat18.csv", row.names = F)
 # GeoSurvey map widget ----------------------------------------------------
 w <- leaflet() %>% 
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
-  addCircleMarkers(bcoord$lon, bcoord$lat, clusterOptions = markerClusterOptions())
+  addCircleMarkers(gsdat$lon, gsdat$lat, clusterOptions = markerClusterOptions())
 w ## plot widget 
 saveWidget(w, 'NG_bcoord.html', selfcontained = T) ## save widget
 
