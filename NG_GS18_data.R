@@ -84,7 +84,7 @@ projection(geos) <- projection(grids)
 geosgrid <- extract(grids, geos)
 gsdat <- as.data.frame(cbind(geos, geosgrid)) 
 # gsdat <- gsdat[!duplicated(gsdat), ] ## removes any duplicates ... if needed
-gsdat <- gsdat[complete.cases(gsdat[ ,c(8:11)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(8:58)]),] ## removes incomplete cases
 # gsdat <- gsdat[ which(gsdat$CP=='Y'), ] ## selects croplands only
 gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens observer ID's
 
