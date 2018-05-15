@@ -1,4 +1,4 @@
-# Ghana 2018 GeoSurvey 250m resolution cropland data setup
+# Ghana 2018 GeoSurvey 250m resolution data setup
 # M. Walsh, May 2018
 
 # Required packages
