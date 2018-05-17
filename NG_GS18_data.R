@@ -103,5 +103,5 @@ saveWidget(w, 'NG_GS18.html', selfcontained = T) ## save widget
 # GeoSurvey contributions -------------------------------------------------
 gscon <- as.data.frame(table(gsdat$observer))
 set.seed(1235813)
-wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(3,0.1), random.order = T)
+wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(4,0.1), random.order = T)
 
