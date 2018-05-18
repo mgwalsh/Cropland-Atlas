@@ -26,12 +26,12 @@ seed <- 12358
 set.seed(seed)
 
 # split data into calibration and validation sets
-gsIndex <- createDataPartition(gsdat$rice, p = 4/5, list = F, times = 1)
+gsIndex <- createDataPartition(gsdat$BP, p = 4/5, list = F, times = 1)
 gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$rice ## change this to include other dependent variables e.g, $BP, $WP, $BIC
+cp_cal <- gs_cal$BP ## change this to include other dependent variables e.g, $WP, $BIC, $rice
 
 # raster calibration features
 gf_cal <- gs_cal[,18:62]
@@ -183,7 +183,7 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$rice ## change this to include other dependent variables e.g, $BP, $WP, $BIC
+cp_val <- gspred$BP ## change this to include other dependent variables e.g, $WP, $BIC, $rice
 gf_val <- gspred[,63:67] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
@@ -229,13 +229,13 @@ plot(mask, axes=F, legend=F)
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
 # change this to include other dependent variables e.g, $BP, $WP, $BIC
-writeRaster(gspreds, filename="./Results/TZ_ricepreds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/TZ_BP_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-# change this to include other dependent variables e.g, $BP, $WP, $BIC
-write.csv(gsout, "./Results/TZ_riceout.csv", row.names = F)
+# change this to include other dependent variables e.g, $WP, $BIC, $rice
+write.csv(gsout, "./Results/TZ_BP_out.csv", row.names = F)
 
