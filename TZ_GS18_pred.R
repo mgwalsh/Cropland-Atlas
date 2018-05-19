@@ -239,3 +239,18 @@ gsout <- as.data.frame(cbind(gsdat, gspre))
 # change this to include other dependent variables e.g, $WP, $BIC, $rice
 write.csv(gsout, "./Results/TZ_BP_out.csv", row.names = F)
 
+# Prediction map widget ---------------------------------------------------
+# ensemble prediction map 
+pred <- 1-st.pred ## GeoSurvey ensemble probability
+
+# set color pallet
+pal <- colorBin("Reds", domain = 0:1) 
+
+# render map
+w <- leaflet() %>% 
+  addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
+  addRasterImage(pred, colors = pal, opacity = 0.5, maxBytes=6000000) %>%
+  addLegend(pal = pal, values = values(pred), title = "Probabilty")
+w ## plot widget 
+saveWidget(w, 'TZ_BP_prob.html', selfcontained = T) ## save map
+
