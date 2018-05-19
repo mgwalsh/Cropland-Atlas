@@ -250,7 +250,7 @@ pal <- colorBin("Reds", domain = 0:1)
 w <- leaflet() %>% 
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addRasterImage(pred, colors = pal, opacity = 0.5, maxBytes=6000000) %>%
-  addLegend(pal = pal, values = values(pred), title = "Probabilty")
+  addLegend(pal = pal, values = values(pred), title = "Probability")
 w ## plot widget 
 saveWidget(w, 'TZ_BP_prob.html', selfcontained = T) ## save map
 
