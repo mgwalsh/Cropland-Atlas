@@ -31,7 +31,7 @@ gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$BP ## change this to include other dependent variables e.g, $WP, $BIC, $rice
+cp_cal <- gs_cal$BP ## change this to include other dependent variables e.g, $BIC, $rice
 
 # raster calibration features
 gf_cal <- gs_cal[,18:62]
@@ -229,28 +229,24 @@ plot(mask, axes=F, legend=F)
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
 # change this to include other dependent variables e.g, $BP, $WP, $BIC
-writeRaster(gspreds, filename="./Results/TZ_BP_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/TZ_BP_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-# change this to include other dependent variables e.g, $WP, $BIC, $rice
-write.csv(gsout, "./Results/TZ_BP_out.csv", row.names = F)
+# change the below to include other dependent variables e.g, $BIC, $rice
+write.csv(gsout, "./Results/TZ_BP_out.csv", row.names = F) ## ... change feature names here
 
 # Prediction map widget ---------------------------------------------------
-# ensemble prediction map 
 pred <- 1-st.pred ## GeoSurvey ensemble probability
-
-# set color pallet
-pal <- colorBin("Reds", domain = 0:1) 
-
-# render map
+pal <- colorBin("Reds", domain = 0:1) ## set color palette
 w <- leaflet() %>% 
+  setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 6) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addRasterImage(pred, colors = pal, opacity = 0.5, maxBytes=6000000) %>%
   addLegend(pal = pal, values = values(pred), title = "Probability")
 w ## plot widget 
-saveWidget(w, 'TZ_BP_prob.html', selfcontained = T) ## save map
+saveWidget(w, 'TZ_BP_prob.html', selfcontained = T) ## save html ... change feature names here
 
