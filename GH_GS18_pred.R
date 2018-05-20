@@ -236,6 +236,6 @@ coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-# change this to include other dependent variables e.g, $BP, $WP, $BIC
+# change this to include other dependent variables e.g, $BP, $WP, $BIC, $rice
 write.csv(gsout, "./Results/GH_cpout.csv", row.names = F)
 
