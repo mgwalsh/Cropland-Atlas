@@ -1,4 +1,4 @@
-# Tanzania GeoSurvey 250m resolution cropland data setup
+# Tanzania GeoSurvey 2018 250m resolution GS data setup
 # M. Walsh, April 2018
 
 # Required packages
