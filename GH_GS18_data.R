@@ -93,7 +93,8 @@ write.csv(bcoord, "./Results/GH_bcoord.csv", row.names = F)
 write.csv(gsdat, "./Results/GH_gsdat18.csv", row.names = F)
 
 # GeoSurvey map widget ----------------------------------------------------
-w <- leaflet() %>% 
+w <- leaflet() %>%
+  setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 7) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addCircleMarkers(gsdat$lon, gsdat$lat, clusterOptions = markerClusterOptions())
 w ## plot widget 
