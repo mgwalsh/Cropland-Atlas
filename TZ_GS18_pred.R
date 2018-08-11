@@ -26,12 +26,12 @@ seed <- 12358
 set.seed(seed)
 
 # split data into calibration and validation sets
-gsIndex <- createDataPartition(gsdat$BP, p = 4/5, list = F, times = 1)
+gsIndex <- createDataPartition(gsdat$rice, p = 4/5, list = F, times = 1)
 gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$BP ## change this to include other dependent variables e.g, $BIC, $rice
+cp_cal <- gs_cal$rice ## change this to include other dependent variables e.g, $BIC, $BP
 
 # raster calibration features
 gf_cal <- gs_cal[,18:62]
@@ -183,7 +183,7 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$BP ## change this to include other dependent variables e.g, $WP, $BIC, $rice
+cp_val <- gspred$rice ## change this to include other dependent variables e.g, $BP, $BIC
 gf_val <- gspred[,63:67] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
@@ -236,8 +236,8 @@ coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-# change the below to include other dependent variables e.g, $BIC, $rice
-write.csv(gsout, "./Results/TZ_BP_out.csv", row.names = F) ## ... change feature names here
+# change the below to include other dependent variables e.g, $BIC, $BP
+write.csv(gsout, "./Results/TZ_rice_out.csv", row.names = F) ## ... change feature names here
 
 # Prediction map widget ---------------------------------------------------
 pred <- 1-st.pred ## GeoSurvey ensemble probability
@@ -245,8 +245,8 @@ pal <- colorBin("Reds", domain = 0:1) ## set color palette
 w <- leaflet() %>% 
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 6) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
-  addRasterImage(pred, colors = pal, opacity = 0.5, maxBytes=6000000) %>%
+  addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
   addLegend(pal = pal, values = values(pred), title = "Probability")
 w ## plot widget 
-saveWidget(w, 'TZ_BP_prob.html', selfcontained = T) ## save html ... change feature names here
+saveWidget(w, 'TZ_rice_prob.html', selfcontained = T) ## save html ... change feature names here
 
