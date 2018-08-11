@@ -31,8 +31,8 @@ unzip("TZA_adm3.zip", overwrite = T)
 shape <- shapefile("TZA_adm3.shp")
 
 # download raster stack (note this is a big 1+ Gb download)
-download("https://www.dropbox.com/s/y1ht9tazxqvsggp/TZ_250m_2018.zip?raw=1", "TZ_250m_2018.zip", mode = "wb")
-unzip("TZ_250m_2018.zip", overwrite = T)
+download("https://www.dropbox.com/s/pshrtvjf7navegu/TZ_250m_2017.zip?raw=1", "TZ_250m_2017.zip", mode = "wb")
+unzip("TZ_250m_2017.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 
