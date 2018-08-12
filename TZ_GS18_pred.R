@@ -89,6 +89,30 @@ gl2.pred <- predict(grids, gl2, type = "prob") ## spatial predictions
 
 stopCluster(mc)
 
+# Regularized regression <glmnet> -----------------------------------------
+# start doParallel to parallelize model fitting
+mc <- makeCluster(detectCores())
+registerDoParallel(mc)
+
+# control setup
+set.seed(1385321)
+tc <- trainControl(method = "cv", classProbs = T,
+                   summaryFunction = twoClassSummary, allowParallel = T)
+
+# model training
+rr <- train(gf_cal, cp_cal, 
+            method = "glmnet",
+            family = "binomial",
+            preProc = c("center","scale"), 
+            trControl = tc,
+            metric ="ROC")
+
+# model outputs & predictions
+plot(varImp(rr))
+rr.pred <- predict(grids, rr, type = "prob") ## spatial predictions
+
+stopCluster(mc)
+
 # Random forest <randomForest> --------------------------------------------
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -172,8 +196,8 @@ nn.pred <- predict(grids, nn, type = "prob") ## spatial predictions
 stopCluster(mc)
 
 # Model stacking setup ----------------------------------------------------
-preds <- stack(1-gl1.pred, 1-gl2.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
-names(preds) <- c("gl1","gl2","rf", "gb","nn")
+preds <- stack(1-gl1.pred, 1-gl2.pred, 1-rr.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
+names(preds) <- c("gl1","gl2","rr","rf","gb","nn")
 plot(preds, axes = F)
 
 # extract model predictions
@@ -184,7 +208,7 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
 cp_val <- gspred$rice ## change this to include other dependent variables e.g, $BP, $BIC
-gf_val <- gspred[,63:67] ## subset validation features
+gf_val <- gspred[,63:68] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -198,13 +222,12 @@ tc <- trainControl(method = "cv", classProbs = T,
 
 # model training
 st <- train(gf_val, cp_val,
-            method = "glmnet",
+            method = "glm",
             family = "binomial",
             metric = "ROC",
             trControl = tc)
 
 # model outputs & predictions
-print(st)
 plot(varImp(st))
 st.pred <- predict(preds, st, type = "prob") ## spatial predictions
 plot(1-st.pred, axes = F)
@@ -227,8 +250,8 @@ plot(mask, axes=F, legend=F)
 
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
-names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
-# change this to include other dependent variables e.g, $BP, $WP, $BIC
+names(gspreds) <- c("gl1","gl2","rr","rf","gb","nn","st","mk")
+# change this to include other dependent variables e.g, $BP, $BIC
 writeRaster(gspreds, filename="./Results/TZ_rice_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
