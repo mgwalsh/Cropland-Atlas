@@ -36,59 +36,6 @@ cp_cal <- gs_cal$rice ## change this to include other dependent variables e.g, $
 # raster calibration features
 gf_cal <- gs_cal[,18:62]
 
-# Central place theory model <glm> -----------------------------------------
-# select central place covariates
-gf_cpv <- gs_cal[,27:37]
-
-# start doParallel to parallelize model fitting
-mc <- makeCluster(detectCores())
-registerDoParallel(mc)
-
-# control setup
-set.seed(1385321)
-tc <- trainControl(method = "cv", classProbs = T,
-                   summaryFunction = twoClassSummary, allowParallel = T)
-
-# model training
-gl1 <- train(gf_cpv, cp_cal, 
-             method = "glmStepAIC",
-             family = "binomial",
-             preProc = c("center","scale"), 
-             trControl = tc,
-             metric ="ROC")
-
-# model outputs & predictions
-summary(gl1)
-print(gl1) ## ROC's accross cross-validation
-gl1.pred <- predict(grids, gl1, type = "prob") ## spatial predictions
-
-stopCluster(mc)
-
-# GLM with all covariates -------------------------------------------------
-# start doParallel to parallelize model fitting
-mc <- makeCluster(detectCores())
-registerDoParallel(mc)
-
-# control setup
-set.seed(1385321)
-tc <- trainControl(method = "cv", classProbs = T,
-                   summaryFunction = twoClassSummary, allowParallel = T)
-
-# model training
-gl2 <- train(gf_cal, cp_cal, 
-             method = "glmStepAIC",
-             family = "binomial",
-             preProc = c("center","scale"), 
-             trControl = tc,
-             metric ="ROC")
-
-# model outputs & predictions
-summary(gl2)
-print(gl2) ## ROC's accross cross-validation
-gl2.pred <- predict(grids, gl2, type = "prob") ## spatial predictions
-
-stopCluster(mc)
-
 # Regularized regression <glmnet> -----------------------------------------
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
