@@ -55,6 +55,7 @@ rr <- train(gf_cal, cp_cal,
             metric ="ROC")
 
 # model outputs & predictions
+print(rr)
 plot(varImp(rr))
 rr.pred <- predict(grids, rr, type = "prob") ## spatial predictions
 
@@ -143,8 +144,8 @@ nn.pred <- predict(grids, nn, type = "prob") ## spatial predictions
 stopCluster(mc)
 
 # Model stacking setup ----------------------------------------------------
-preds <- stack(1-gl1.pred, 1-gl2.pred, 1-rr.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
-names(preds) <- c("gl1","gl2","rr","rf","gb","nn")
+preds <- stack(1-rr.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
+names(preds) <- c("rr","rf","gb","nn")
 plot(preds, axes = F)
 
 # extract model predictions
@@ -155,7 +156,7 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
 cp_val <- gspred$rice ## change this to include other dependent variables e.g, $BP, $BIC
-gf_val <- gspred[,63:68] ## subset validation features
+gf_val <- gspred[,63:66] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -175,6 +176,7 @@ st <- train(gf_val, cp_val,
             trControl = tc)
 
 # model outputs & predictions
+summary(st)
 plot(varImp(st))
 st.pred <- predict(preds, st, type = "prob") ## spatial predictions
 plot(1-st.pred, axes = F)
@@ -197,7 +199,7 @@ plot(mask, axes=F, legend=F)
 
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
-names(gspreds) <- c("gl1","gl2","rr","rf","gb","nn","st","mk")
+names(gspreds) <- c("rr","rf","gb","nn","st","mk")
 # change this to include other dependent variables e.g, $BP, $BIC
 writeRaster(gspreds, filename="./Results/TZ_rice_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
