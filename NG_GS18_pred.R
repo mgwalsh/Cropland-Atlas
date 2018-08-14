@@ -31,15 +31,12 @@ gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$rice ## change this to include other dependent variables e.g, $BP, $WP, $BIC
+cp_cal <- gs_cal$rice ## change this to include other dependent variables e.g, $BIC, $BP
 
 # raster calibration features
 gf_cal <- gs_cal[,16:58]
 
-# Central place theory model <glm> -----------------------------------------
-# select central place covariates
-gf_cpv <- gs_cal[,25:35]
-
+# Regularized regression <glmnet> -----------------------------------------
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
 registerDoParallel(mc)
@@ -50,42 +47,17 @@ tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
 
 # model training
-gl1 <- train(gf_cpv, cp_cal, 
-             method = "glmStepAIC",
-             family = "binomial",
-             preProc = c("center","scale"), 
-             trControl = tc,
-             metric ="ROC")
+rr <- train(gf_cal, cp_cal, 
+            method = "glmnet",
+            family = "binomial",
+            preProc = c("center","scale"), 
+            trControl = tc,
+            metric ="ROC")
 
 # model outputs & predictions
-summary(gl1)
-print(gl1) ## ROC's accross cross-validation
-gl1.pred <- predict(grids, gl1, type = "prob") ## spatial predictions
-
-stopCluster(mc)
-
-# GLM with all covariates -------------------------------------------------
-# start doParallel to parallelize model fitting
-mc <- makeCluster(detectCores())
-registerDoParallel(mc)
-
-# control setup
-set.seed(1385321)
-tc <- trainControl(method = "cv", classProbs = T,
-                   summaryFunction = twoClassSummary, allowParallel = T)
-
-# model training
-gl2 <- train(gf_cal, cp_cal, 
-             method = "glmStepAIC",
-             family = "binomial",
-             preProc = c("center","scale"), 
-             trControl = tc,
-             metric ="ROC")
-
-# model outputs & predictions
-summary(gl2)
-print(gl2) ## ROC's accross cross-validation
-gl2.pred <- predict(grids, gl2, type = "prob") ## spatial predictions
+print(rr)
+plot(varImp(rr))
+rr.pred <- predict(grids, rr, type = "prob") ## spatial predictions
 
 stopCluster(mc)
 
@@ -98,7 +70,7 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
-tg <- expand.grid(mtry = seq(1,3, by=1)) ## model tuning steps
+tg <- expand.grid(mtry = seq(1,5, by=1)) ## model tuning steps
 
 # model training
 rf <- train(gf_cal, cp_cal,
@@ -126,8 +98,8 @@ set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T, summaryFunction = twoClassSummary,
                    allowParallel = T)
 
-# for initial <gbm> tuning guidelines see @ https://stats.stackexchange.com/questions/25748/what-are-some-useful-guidelines-for-gbm-parameters
-tg <- expand.grid(interaction.depth = seq(10,18, by=2), shrinkage = 0.01, n.trees = 501,
+## for initial <gbm> tuning guidelines see @ https://stats.stackexchange.com/questions/25748/what-are-some-useful-guidelines-for-gbm-parameters
+tg <- expand.grid(interaction.depth = seq(6,14, by=2), shrinkage = 0.01, n.trees = 501,
                   n.minobsinnode = 25) ## model tuning steps
 
 # model training
@@ -154,7 +126,7 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
-tg <- expand.grid(size = seq(1,5, by=1), decay = 0.01) ## model tuning steps
+tg <- expand.grid(size = seq(6,14, by=2), decay = 0.01) ## model tuning steps
 
 # model training
 nn <- train(gf_cal, cp_cal, 
@@ -172,8 +144,8 @@ nn.pred <- predict(grids, nn, type = "prob") ## spatial predictions
 stopCluster(mc)
 
 # Model stacking setup ----------------------------------------------------
-preds <- stack(1-gl1.pred, 1-gl2.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
-names(preds) <- c("gl1","gl2","rf", "gb","nn")
+preds <- stack(1-rr.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
+names(preds) <- c("rr","rf","gb","nn")
 plot(preds, axes = F)
 
 # extract model predictions
@@ -183,8 +155,8 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$rice ## change this to include other dependent variables e.g, $BP, $WP, $BIC
-gf_val <- gspred[,59:63] ## subset validation features
+cp_val <- gspred$rice ## change this to include other dependent variables e.g, $BP, $BIC
+gf_val <- gspred[,59:62] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -198,13 +170,13 @@ tc <- trainControl(method = "cv", classProbs = T,
 
 # model training
 st <- train(gf_val, cp_val,
-            method = "glmnet",
+            method = "glm",
             family = "binomial",
             metric = "ROC",
             trControl = tc)
 
 # model outputs & predictions
-print(st)
+summary(st)
 plot(varImp(st))
 st.pred <- predict(preds, st, type = "prob") ## spatial predictions
 plot(1-st.pred, axes = F)
@@ -227,15 +199,26 @@ plot(mask, axes=F, legend=F)
 
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
-names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
-# change this to include other dependent variables e.g, $BP, $WP, $BIC
-writeRaster(gspreds, filename="./Results/NG_ricepreds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+names(gspreds) <- c("rr","rf","gb","nn","st","mk")
+# change this to include other dependent variables e.g, $BP, $BIC
+writeRaster(gspreds, filename="./Results/TZ_rice_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-# change this to include other dependent variables e.g, $BP, $WP, $BIC
-write.csv(gsout, "./Results/NG_riceout.csv", row.names = F)
+# change the below to include other dependent variables e.g, $BIC, $BP
+write.csv(gsout, "./Results/NG_rice_out.csv", row.names = F) ## ... change feature names here
+
+# Prediction map widget ---------------------------------------------------
+pred <- 1-st.pred ## GeoSurvey ensemble probability
+pal <- colorBin("Reds", domain = 0:1) ## set color palette
+w <- leaflet() %>% 
+  setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 6) %>%
+  addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
+  addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
+  addLegend(pal = pal, values = values(pred), title = "Probability")
+w ## plot widget 
+saveWidget(w, 'NG_rice_prob.html', selfcontained = T) ## save html ... change feature names here
 
