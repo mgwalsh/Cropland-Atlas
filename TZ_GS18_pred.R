@@ -197,6 +197,13 @@ r <- matrix(c(0, t[,1], 0, t[,1], 1, 1), ncol=3, byrow = T) ## set threshold val
 mask <- reclassify(1-st.pred, r) ## reclassify stacked predictions
 plot(mask, axes=F, legend=F)
 
+# Validation performance measures -----------------------------------------
+perfv <- cp_val[,1:3]
+perfv$pred <- as.factor(ifelse(perfv$Y >= t[,1], c("Y"), c("N")))
+colnames(perfv) <- c("obs","N","Y","pred")
+confusionMatrix(data = perfv$pred, reference = perfv$obs, mode = "prec_recall")
+prSummary(perfv, lev = levels(perfv$obs))
+
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("rr","rf","gb","nn","st","mk")
