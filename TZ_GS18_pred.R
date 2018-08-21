@@ -202,7 +202,6 @@ perfv <- cp_val[,1:3]
 perfv$pred <- as.factor(ifelse(perfv$Y >= t[,1], c("Y"), c("N")))
 colnames(perfv) <- c("obs","N","Y","pred")
 confusionMatrix(data = perfv$pred, reference = perfv$obs, positive = "Y")
-twoClassSummary(perfv, lev = levels(perfv$obs))
 
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
@@ -224,7 +223,6 @@ perf$mk <- as.factor(ifelse(perf$mk == 1, c("Y"), c("N")))
 perf$pN <- 1-perf$st
 colnames(perf) <- c("obs","pred","Y","N")
 confusionMatrix(data = perf$pred, reference = perf$obs, positive = "Y")
-twoClassSummary(perf, lev = levels(perf$obs))
 
 # Prediction map widget ---------------------------------------------------
 pred <- 1-st.pred ## GeoSurvey ensemble probability
