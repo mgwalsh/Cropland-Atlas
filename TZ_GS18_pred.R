@@ -211,6 +211,14 @@ gsout <- as.data.frame(cbind(gsdat, gspre))
 # change the below to include other dependent variables e.g, $BIC, $BP
 write.csv(gsout, "./Results/TZ_rice_out.csv", row.names = F) ## ... change feature names here
 
+# Overall performance measures --------------------------------------------
+perf <- gsout[,c(13,68,67)]
+perf$mk <- as.factor(ifelse(perf$mk == 1, c("Y"), c("N")))
+perf$pN <- 1-perf$st
+colnames(perf) <- c("obs","pred","Y","N")
+confusionMatrix(data = perf$pred, reference = perf$obs, mode = "prec_recall")
+prSummary(perf, lev = levels(perf$obs))
+
 # Prediction map widget ---------------------------------------------------
 pred <- 1-st.pred ## GeoSurvey ensemble probability
 pal <- colorBin("Reds", domain = 0:1) ## set color palette
