@@ -197,6 +197,12 @@ r <- matrix(c(0, t[,1], 0, t[,1], 1, 1), ncol=3, byrow = T) ## set threshold val
 mask <- reclassify(1-st.pred, r) ## reclassify stacked predictions
 plot(mask, axes=F, legend=F)
 
+# Validation performance measures -----------------------------------------
+perfv <- cp_val[,1:3]
+perfv$pred <- as.factor(ifelse(perfv$Y >= t[,1], c("Y"), c("N")))
+colnames(perfv) <- c("obs","N","Y","pred")
+confusionMatrix(data = perfv$pred, reference = perfv$obs, positive = "Y")
+
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("rr","rf","gb","nn","st","mk")
@@ -210,6 +216,13 @@ gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 # change the below to include other dependent variables e.g, $BIC, $BP
 write.csv(gsout, "./Results/NG_rice_out.csv", row.names = F) ## ... change feature names here
+
+# Overall performance measures --------------------------------------------
+perf <- gsout[,c(11,64,63)]
+perf$mk <- as.factor(ifelse(perf$mk == 1, c("Y"), c("N")))
+perf$N <- 1-perf$st
+colnames(perf) <- c("obs","pred","Y","N")
+confusionMatrix(data = perf$pred, reference = perf$obs, positive = "Y")
 
 # Prediction map widget ---------------------------------------------------
 pred <- 1-st.pred ## GeoSurvey ensemble probability
