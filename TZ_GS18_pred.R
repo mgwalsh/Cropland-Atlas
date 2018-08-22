@@ -220,7 +220,7 @@ write.csv(gsout, "./Results/TZ_rice_out.csv", row.names = F) ## ... change featu
 # Overall performance measures --------------------------------------------
 perf <- gsout[,c(13,68,67)]
 perf$mk <- as.factor(ifelse(perf$mk == 1, c("Y"), c("N")))
-perf$pN <- 1-perf$st
+perf$N <- 1-perf$st
 colnames(perf) <- c("obs","pred","Y","N")
 confusionMatrix(data = perf$pred, reference = perf$obs, positive = "Y")
 
