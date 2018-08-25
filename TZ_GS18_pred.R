@@ -26,6 +26,7 @@ seed <- 12358
 set.seed(seed)
 
 # split data into calibration and validation sets
+gsdat <- gsdat[ which(gsdat$CP == 'Y'), ] ## selects observed croplands only
 gsIndex <- createDataPartition(gsdat$rice, p = 4/5, list = F, times = 1)
 gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
@@ -99,7 +100,7 @@ tc <- trainControl(method = "cv", classProbs = T, summaryFunction = twoClassSumm
                    allowParallel = T)
 
 ## for initial <gbm> tuning guidelines see @ https://stats.stackexchange.com/questions/25748/what-are-some-useful-guidelines-for-gbm-parameters
-tg <- expand.grid(interaction.depth = seq(6,14, by=2), shrinkage = 0.01, n.trees = 501,
+tg <- expand.grid(interaction.depth = seq(10,20, by=2), shrinkage = 0.01, n.trees = 501,
                   n.minobsinnode = 25) ## model tuning steps
 
 # model training
