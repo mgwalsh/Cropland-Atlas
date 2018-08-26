@@ -26,6 +26,7 @@ seed <- 12358
 set.seed(seed)
 
 # split data into calibration and validation sets
+gsdat <- gsdat[ which(gsdat$CP == 'Y'), ] ## selects observed croplands only
 gsIndex <- createDataPartition(gsdat$rice, p = 4/5, list = F, times = 1)
 gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
@@ -207,7 +208,7 @@ confusionMatrix(data = perfv$pred, reference = perfv$obs, positive = "Y")
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("rr","rf","gb","nn","st","mk")
 # change this to include other dependent variables e.g, $BP, $BIC
-writeRaster(gspreds, filename="./Results/TZ_rice_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
+writeRaster(gspreds, filename="./Results/NG_rice_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
