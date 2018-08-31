@@ -227,7 +227,7 @@ confusionMatrix(data = perf$pred, reference = perf$obs, positive = "Y")
 
 # Prediction map widget ---------------------------------------------------
 pred <- 1-st.pred ## GeoSurvey ensemble probability
-pal <- colorBin("Reds", domain = 0:1) ## set color palette
+pal <- colorBin("Greens", domain = 0:1) ## set color palette
 w <- leaflet() %>% 
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 6) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
