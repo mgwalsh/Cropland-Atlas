@@ -225,6 +225,13 @@ perf$N <- 1-perf$st
 colnames(perf) <- c("obs","pred","Y","N")
 confusionMatrix(data = perf$pred, reference = perf$obs, positive = "Y")
 
+# Regional summaries ------------------------------------------------------
+require(arm)
+gadm.lme <- glmer(rice~mk+(mk|region), family=binomial, data=gsout)
+display(gadm.lme)
+gadm.ran <- ranef(gadm.lme) ## extract random effects
+gadm.ses <- se.coef(gadm.lme) ## extract standard errors on random effects
+
 # Prediction map widget ---------------------------------------------------
 pred <- 1-st.pred ## GeoSurvey ensemble probability
 pal <- colorBin("Greens", domain = 0:1) ## set color palette
