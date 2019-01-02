@@ -1,4 +1,4 @@
-# Stacked predictions of Nigeria 2018 GeoSurvey cropland observations
+# Stacked predictions of Nigeria 2018 GeoSurvey settlement observations
 # M. Walsh, April 2018
 
 # Required packages
@@ -26,12 +26,12 @@ seed <- 12358
 set.seed(seed)
 
 # split data into calibration and validation sets
-gsIndex <- createDataPartition(gsdat$CP, p = 4/5, list = F, times = 1)
+gsIndex <- createDataPartition(gsdat$BP, p = 4/5, list = F, times = 1)
 gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$CP
+cp_cal <- gs_cal$BP
 
 # raster calibration features
 gf_cal <- gs_cal[,16:58]
@@ -183,7 +183,7 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$CP ## change this to $BP, $WP or $BIC
+cp_val <- gspred$BP ## change this to $BP, $WP or $BIC
 gf_val <- gspred[,59:63] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
@@ -228,7 +228,7 @@ plot(mask, axes=F)
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
-writeRaster(gspreds, filename="./Results/NG_CP_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/NG_BP_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
@@ -236,17 +236,17 @@ projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 gsout$mzone <- ifelse(gsout$mk == 1, "Y", "N")
-confusionMatrix(data = gsout$mzone, reference = gsout$CP, positive = "Y")
-write.csv(gsout, "./Results/NG_CP_out.csv", row.names = F) ## ... change feature names here if needed
+confusionMatrix(data = gsout$mzone, reference = gsout$BP, positive = "Y")
+write.csv(gsout, "./Results/NG_BP_out.csv", row.names = F) ## ... change feature names here if needed
 
 # Prediction map widget ---------------------------------------------------
 pred <- 1-st.pred ## GeoSurvey ensemble probability
-pal <- colorBin("Greens", domain = 0:1) ## set color palette
+pal <- colorBin("Reds", domain = 0:1) ## set color palette
 w <- leaflet() %>% 
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 6) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addRasterImage(pred, colors = pal, opacity = 0.3, maxBytes=6000000) %>%
-  addLegend(pal = pal, values = values(pred), title = "Cropland prob.")
+  addLegend(pal = pal, values = values(pred), title = "Settlement prob.")
 w ## plot widget 
 saveWidget(w, 'NG_CP_prob.html', selfcontained = T) ## save html ... change feature names here
 
