@@ -1,4 +1,4 @@
-# Nigeria 2018 GeoSurvey 250m resolution cropland data setup
+# Nigeria 2018 GeoSurvey 250m resolution data setup
 # M. Walsh, April 2018
 
 # Required packages
