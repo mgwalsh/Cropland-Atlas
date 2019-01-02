@@ -31,7 +31,7 @@ gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$BP
+cp_cal <- gs_cal$BP ## change to $CP, $WP etc
 
 # raster calibration features
 gf_cal <- gs_cal[,16:58]
