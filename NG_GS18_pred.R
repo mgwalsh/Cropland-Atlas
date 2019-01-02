@@ -248,5 +248,5 @@ w <- leaflet() %>%
   addRasterImage(pred, colors = pal, opacity = 0.3, maxBytes=6000000) %>%
   addLegend(pal = pal, values = values(pred), title = "Settlement prob.")
 w ## plot widget 
-saveWidget(w, 'NG_CP_prob.html', selfcontained = T) ## save html ... change feature names here
+saveWidget(w, 'NG_BP_prob.html', selfcontained = T) ## save html ... change feature names here
 
