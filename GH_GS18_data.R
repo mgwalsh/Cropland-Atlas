@@ -98,7 +98,7 @@ w <- leaflet() %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addCircleMarkers(gsdat$lon, gsdat$lat, clusterOptions = markerClusterOptions())
 w ## plot widget 
-saveWidget(w, 'NG_GS18.html', selfcontained = T) ## save widget
+saveWidget(w, 'GH_GS18.html', selfcontained = T) ## save widget
 
 # GeoSurvey contributions -------------------------------------------------
 gscon <- as.data.frame(table(gsdat$observer))
