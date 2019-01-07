@@ -17,7 +17,7 @@ suppressPackageStartupMessages({
 })
 
 # Data setup --------------------------------------------------------------
-# SourceURL <- "https://raw.githubusercontent.com/mgwalsh/blob/master/TZ_GS18_data.R"
+# SourceURL <- "https://raw.githubusercontent.com/mgwalsh/blob/master/GH_GS18_data.R"
 # source_url(SourceURL)
 rm(list=setdiff(ls(), c("gsdat","grids"))) ## scrub extraneous objects in memory
 
@@ -26,12 +26,12 @@ seed <- 12358
 set.seed(seed)
 
 # split data into calibration and validation sets
-gsIndex <- createDataPartition(gsdat$CP, p = 4/5, list = F, times = 1)
+gsIndex <- createDataPartition(gsdat$BP, p = 4/5, list = F, times = 1)
 gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$CP ## change this to include other dependent variables e.g, $BP, $WP, $BIC, $rice
+cp_cal <- gs_cal$BP ## change this to include other dependent variables e.g, $CP, $WP, $BIC, $rice
 
 # raster calibration features
 gf_cal <- gs_cal[,16:54]
@@ -183,7 +183,7 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$CP ## change this to include other dependent variables e.g, $BP, $WP, $BIC
+cp_val <- gspred$BP ## change this to include other dependent variables e.g, $CP, $WP, $BIC
 gf_val <- gspred[,55:59] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
@@ -229,13 +229,24 @@ plot(mask, axes=F, legend=F)
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
 # change this to include other dependent variables e.g, $BP, $WP, $BIC
-writeRaster(gspreds, filename="./Results/GS_CP_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/GH_BP_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-# change this to include other dependent variables e.g, $BP, $WP, $BIC, $rice
-write.csv(gsout, "./Results/GH_cpout.csv", row.names = F)
+gsout$mzone <- ifelse(gsout$mk == 1, "Y", "N")
+confusionMatrix(data = gsout$mzone, reference = gsout$BP, positive = "Y")
+write.csv(gsout, "./Results/GH_BP_out.csv", row.names = F) ## ... change feature names here if needed
 
+# Prediction map widget ---------------------------------------------------
+pred <- 1-st.pred ## GeoSurvey ensemble probability
+pal <- colorBin("Reds", domain = 0:1) ## set color palette
+w <- leaflet() %>% 
+  setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 7) %>%
+  addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
+  addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
+  addLegend(pal = pal, values = values(pred), title = "Settlement prob.")
+w ## plot widget 
+saveWidget(w, 'GH_BP_2018.html', selfcontained = T) ## save html ... change feature names here
