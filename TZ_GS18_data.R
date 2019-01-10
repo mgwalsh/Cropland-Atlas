@@ -91,7 +91,7 @@ gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens obser
 # Write data frame --------------------------------------------------------
 dir.create("Results", showWarnings = F)
 write.csv(bcoord, "./Results/TZ_bcoord.csv", row.names = F)
-write.csv(gsdat, "./Results/TZ_gsdat.csv", row.names = F)
+write.csv(gsdat, "./Results/TZ_gsdat_2018.csv", row.names = F)
 
 # GeoSurvey map widget ----------------------------------------------------
 w <- leaflet() %>%
