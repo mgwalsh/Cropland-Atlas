@@ -211,6 +211,5 @@ coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-# plot(bcount~st, gsout)
 write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
 
