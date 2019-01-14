@@ -1,4 +1,4 @@
-# Stacked predictions of Tanzania 2018 GeoSurvey building density observations
+# Stacked predictions of Tanzania 2018 GeoSurvey building density observations (in croplands)
 # M. Walsh, January 2019
 
 # Required packages
@@ -18,7 +18,7 @@ suppressPackageStartupMessages({
 # SourceURL <- "https://raw.githubusercontent.com/mgwalsh/blob/master/TZ_GS18_data.R"
 # source_url(SourceURL)
 rm(list=setdiff(ls(), c("gsdat","grids"))) ## scrubs extraneous objects in memory
-gsdat <- gsdat[ which(gsdat$CP=='Y'), ] ## selects observations in croplands only, could be changed to $BP, $BIC
+gsdat <- gsdat[ which(gsdat$CP=='Y'), ] ## selects cropland observations
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -213,16 +213,4 @@ gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 # plot(bcount~st, gsout)
 write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
-
-# Prediction map widget ---------------------------------------------------
-pred <- st.pred ## GeoSurvey ensemble prediction
-pal <- colorNumeric("Reds", values(pred), na.color = "transparent")
-# pal <- colorBin("Reds", domain = NULL, bins = 5, na.color = "transparent")
-w <- leaflet() %>% 
-  setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 6) %>%
-  addProviderTiles(providers$OpenStreetMap.BlackAndWhite) %>%
-  addRasterImage(pred, colors = pal, opacity = 0.8, maxBytes=60000000) %>%
-  addLegend(pal = pal, values = values(pred), title = "Building density")
-w ## plot widget 
-saveWidget(w, 'TZ_bcount.html', selfcontained = T) ## save html ... change feature names here
 
