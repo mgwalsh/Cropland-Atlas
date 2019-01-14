@@ -193,6 +193,7 @@ st <- train(gf_val, cp_val,
             trControl = tc)
 
 # model outputs & predictions
+st
 summary(st)
 plot(varImp(st))
 st.pred <- predict(preds, st) ## spatial predictions
@@ -201,10 +202,9 @@ plot(st.pred, axes = F)
 stopCluster(mc)
 
 # Write prediction grids --------------------------------------------------
-gspreds <- stack(preds, 1-st.pred, mask)
-names(gspreds) <- c("rr","rf","gb","nn","st","mk")
-# change this to include other dependent variables e.g, $BP, $BIC
-writeRaster(gspreds, filename="./Results/TZ_rice_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
+gspreds <- stack(preds)
+names(gspreds) <- c("rr","rf","gb","nn","st")
+writeRaster(gspreds, filename="./Results/TZ_bcount_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
@@ -214,13 +214,13 @@ gsout <- as.data.frame(cbind(gsdat, gspre))
 write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
 
 # Prediction map widget ---------------------------------------------------
-pred <- st.pred ## GeoSurvey ensemble probability
+pred <- st.pred ## GeoSurvey ensemble prediction
 pal <- colorBin("Reds", domain = 0:5) ## set color palette
 w <- leaflet() %>% 
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 6) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
-  addLegend(pal = pal, values = values(pred), title = "Probability")
+  addLegend(pal = pal, values = values(pred), title = "Building density")
 w ## plot widget 
 saveWidget(w, 'TZ_bcount.html', selfcontained = T) ## save html ... change feature names here
 
