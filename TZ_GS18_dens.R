@@ -211,7 +211,7 @@ coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F) ## ... change feature names here
+write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
 
 # Prediction map widget ---------------------------------------------------
 pred <- st.pred ## GeoSurvey ensemble probability
@@ -222,5 +222,5 @@ w <- leaflet() %>%
   addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
   addLegend(pal = pal, values = values(pred), title = "Probability")
 w ## plot widget 
-saveWidget(w, 'TZ_rice_prob.html', selfcontained = T) ## save html ... change feature names here
+saveWidget(w, 'TZ_bcount.html', selfcontained = T) ## save html ... change feature names here
 
