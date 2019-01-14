@@ -202,8 +202,8 @@ plot(st.pred, axes = F)
 stopCluster(mc)
 
 # Write prediction grids --------------------------------------------------
-gspreds <- stack(preds)
-names(gspreds) <- c("rr","rf","gb","nn","st")
+gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, st.pred)
+names(gspreds) <- c("gl1","gl2","rf","gb","nn","st")
 writeRaster(gspreds, filename="./Results/TZ_bcount_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
@@ -211,16 +211,18 @@ coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
+# plot(bcount~st, gsout)
 write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
 
 # Prediction map widget ---------------------------------------------------
 pred <- st.pred ## GeoSurvey ensemble prediction
-pal <- colorBin("Reds", domain = 0:6) ## set color palette
+pal <- colorNumeric("Reds", values(pred), na.color = "transparent")
+# pal <- colorBin("Reds", domain = NULL, bins = 5, na.color = "transparent")
 w <- leaflet() %>% 
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 6) %>%
   addProviderTiles(providers$OpenStreetMap.BlackAndWhite) %>%
-  addRasterImage(pred, colors = pal, opacity = 0.8, maxBytes=6000000) %>%
-  addLegend(pal = pal, values = values(pred), title = "log(Building density)")
+  addRasterImage(pred, colors = pal, opacity = 0.8, maxBytes=60000000) %>%
+  addLegend(pal = pal, values = values(pred), title = "Building density")
 w ## plot widget 
 saveWidget(w, 'TZ_bcount.html', selfcontained = T) ## save html ... change feature names here
 
