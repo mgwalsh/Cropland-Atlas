@@ -33,7 +33,7 @@ gs_val <- gsdat[-gsIndex,]
 cp_cal <- log(((gs_cal$bcount)/6.25)+1) ## log transform of the building count data to buildings/ha
 
 # raster calibration features
-gf_cal <- gs_cal[,18:62]
+gf_cal <- gs_cal[,18:63]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
@@ -106,6 +106,7 @@ rf <- train(gf_cal, cp_cal,
 
 # model outputs & predictions
 print(rf) ## RMSEs accross tuning parameters
+plot(varImp(rf)) ## relative variable importance
 rf.pred <- predict(grids, rf) ## spatial predictions
 
 stopCluster(mc)
@@ -176,7 +177,7 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 # stacking model validation labels and features
 cp_val <- gspred$bcount
 cp_val <- log(((gs_val$bcount)/6.25)+1)
-gf_val <- gspred[,63:67] ## subset validation features
+gf_val <- gspred[,64:68] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
