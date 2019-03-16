@@ -212,7 +212,7 @@ coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-plot(bcount/6.25~exp(st)-1, xlab="Predicted building density", ylab="Observed building density", gsout) ## prediction plot check
+plot(bcount/6.25~exp(st)-1, xlab="Predicted building density (per ha)", ylab="Observed building density (per ha)", gsout) ## prediction plot check
 write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
 
 # Prediction plot check
