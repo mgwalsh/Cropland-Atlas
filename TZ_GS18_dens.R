@@ -217,5 +217,5 @@ write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
 
 # Prediction plot check
 par(pty="s")
-plot(bcount/6.25~exp(st)-1, xlab="Predicted building density", ylab="Observed building density", gsout) ## prediction plot check
+plot(bcount/6.25~exp(st)-1, xlab="Predicted building density", ylab="Observed building density", cex.lab=1.5, gsout)
 abline(c(0,1), col="red", lwd=2)
