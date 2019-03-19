@@ -1,4 +1,4 @@
-# Stacked predictions of Tanzania 2018 GeoSurvey building density observations (in croplands)
+# Stacked predictions of Tanzania 2018 GeoSurvey building density observations
 # M. Walsh, January 2019
 
 # Required packages
@@ -216,5 +216,6 @@ write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
 
 # Prediction plot check
 par(pty="s")
-plot(bcount/6.25~exp(st)-1, xlab="Predicted building density", ylab="Observed building density", cex.lab=1.5, gsout)
+plot(bcount/6.25~exp(st)-1, xlab="Predicted building density", ylab="Observed building density", cex.lab=1.5, 
+     xlim=c(-1,41), ylim=c(-1,41), gsout)
 abline(c(0,1), col="red", lwd=2)
