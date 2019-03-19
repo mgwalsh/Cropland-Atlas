@@ -219,3 +219,8 @@ par(pty="s")
 plot(bcount/6.25~exp(st)-1, xlab="Predicted building density", ylab="Observed building density", cex.lab=1.5, 
      xlim=c(-1,41), ylim=c(-1,41), gsout)
 abline(c(0,1), col="red", lwd=2)
+
+par(pty="s")
+plot(bcount/6.25~I(GBD/6.25), xlab="Predicted building density", ylab="Observed building density", cex.lab=1.5, 
+     xlim=c(-1,41), ylim=c(-1,41), gsout)
+abline(c(0,1), col="red", lwd=2)
