@@ -18,7 +18,7 @@ suppressPackageStartupMessages({
 # SourceURL <- "https://raw.githubusercontent.com/mgwalsh/blob/master/TZ_GS18_data.R"
 # source_url(SourceURL)
 rm(list=setdiff(ls(), c("gsdat","grids"))) ## scrubs extraneous objects in memory
-gsdat <- gsdat[ which(gsdat$CP=='Y'), ] ## selects cropland observations
+# gsdat <- gsdat[ which(gsdat$CP=='Y'), ] ## selects cropland observations
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -212,7 +212,6 @@ coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-plot(bcount/6.25~exp(st)-1, xlab="Predicted building density (per ha)", ylab="Observed building density (per ha)", gsout) ## prediction plot check
 write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
 
 # Prediction plot check
