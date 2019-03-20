@@ -214,13 +214,27 @@ gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
 
-# Prediction plot check
-par(pty="s")
-plot(bcount/6.25~exp(st)-1, xlab="Predicted building density", ylab="Observed building density", cex.lab=1.5, 
-     xlim=c(-1,41), ylim=c(-1,41), gsout)
-abline(c(0,1), col="red", lwd=2)
+# Prediction plot checks
+require(devtools)
+require(quantreg)
 
 par(pty="s")
-plot(bcount/6.25~I(GBD/6.25), xlab="Predicted building density", ylab="Observed building density", cex.lab=1.5, 
+par(mfrow=c(1,2), mar=c(5,5,1,1))
+plot(bcount/6.25~I(GBD/6.25), xlab="DigitalGlobe prediction", ylab="GeoSurvey building density", cex.lab=1.5, 
      xlim=c(-1,41), ylim=c(-1,41), gsout)
-abline(c(0,1), col="red", lwd=2)
+gbdQ <- rq(bcount/6.25~I(GBD/6.25), tau=c(0.05,0.5,0.95), data=gsout)
+print(gbdQ)
+curve(gbdQ$coefficients[2]*x+gbdQ$coefficients[1], add=T, from=0, to=41, col="blue", lwd=1)
+curve(gbdQ$coefficients[4]*x+gbdQ$coefficients[3], add=T, from=0, to=41, col="red", lwd=1)
+curve(gbdQ$coefficients[6]*x+gbdQ$coefficients[5], add=T, from=0, to=41, col="blue", lwd=1)
+abline(c(0,1), col="grey", lwd=2)
+
+plot(bcount/6.25~exp(st)-1, xlab="AfSIS ensemble prediction", ylab="GeoSurvey building density", cex.lab=1.5, 
+     xlim=c(-1,41), ylim=c(-1,41), gsout)
+stQ <- rq(bcount/6.25~I(exp(st)-1), tau=c(0.05,0.5,0.95), data=gsout)
+print(stQ)
+curve(stQ$coefficients[2]*x+stQ$coefficients[1], add=T, from=0, to=41, col="blue", lwd=1)
+curve(stQ$coefficients[4]*x+stQ$coefficients[3], add=T, from=0, to=41, col="red", lwd=1)
+curve(stQ$coefficients[6]*x+stQ$coefficients[5], add=T, from=0, to=41, col="blue", lwd=1)
+abline(c(0,1), col="grey", lwd=2)
+
