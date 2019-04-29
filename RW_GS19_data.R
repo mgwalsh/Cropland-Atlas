@@ -81,9 +81,6 @@ projection(geos) <- projection(grids)
 # extract gridded variables at GeoSurvey locations
 geosgrid <- extract(grids, geos)
 gsdat <- as.data.frame(cbind(geos, geosgrid)) 
-# gsdat <- gsdat[!duplicated(gsdat), ] ## removes any duplicates ... if needed
-# gsdat <- gsdat[complete.cases(gsdat[ ,c(10:13,18:63)]),] ## removes incomplete cases
-# gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens observer ID's
 
 # Write data frame --------------------------------------------------------
 dir.create("Results", showWarnings = F)
