@@ -90,13 +90,21 @@ dir.create("Results", showWarnings = F)
 write.csv(bcoord, "./Results/RW_bcoord.csv", row.names = F)
 write.csv(gsdat, "./Results/RW_gsdat_2019.csv", row.names = F)
 
-# GeoSurvey map widget ----------------------------------------------------
+# GeoSurvey map widgets ---------------------------------------------------
 w <- leaflet() %>%
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 9) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addCircleMarkers(gsdat$lon, gsdat$lat, clusterOptions = markerClusterOptions())
 w ## plot widget 
 saveWidget(w, 'RW_GS19.html', selfcontained = T) ## save widget
+
+# building tags
+b <- leaflet() %>%
+  setView(lng = mean(bcoord$lon), lat = mean(bcoord$lat), zoom = 9) %>%
+  addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
+  addCircleMarkers(bcoord$lon, bcoord$lat, clusterOptions = markerClusterOptions())
+b ## plot widget 
+saveWidget(b, 'RW_GS19_buildings.html', selfcontained = T) ## save widget
 
 # GeoSurvey contributions -------------------------------------------------
 gscon <- as.data.frame(table(gsdat$observer))
