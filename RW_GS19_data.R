@@ -41,7 +41,7 @@ projection(geos) <- projection(shape)
 gadm <- geos %over% shape
 geos <- as.data.frame(geos)
 geos <- cbind(gadm[ ,c(4,6,8,10,12)], geos)
-colnames(geos) <- c("region","district","sector","cell", "village","time","observer","id","lat","lon","BP","CP","TP","WP","bloc","cgrid")
+colnames(geos) <- c("region","district","sector","cell", "village","time","observer","id","lat","lon","BP","CP","TP","WP","bloc")
 
 # Coordinates and number of buildings per quadrat -------------------------
 bp <- geos[which(geos$BP == "Y"), ] ## identify quadrats with buildings
