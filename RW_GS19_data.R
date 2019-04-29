@@ -91,6 +91,7 @@ write.csv(bcoord, "./Results/RW_bcoord.csv", row.names = F)
 write.csv(gsdat, "./Results/RW_gsdat_2019.csv", row.names = F)
 
 # GeoSurvey map widgets ---------------------------------------------------
+# number of GeoSurvey quadrats
 w <- leaflet() %>%
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 9) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
@@ -98,7 +99,7 @@ w <- leaflet() %>%
 w ## plot widget 
 saveWidget(w, 'RW_GS19.html', selfcontained = T) ## save widget
 
-# building tags
+# number of building tags
 b <- leaflet() %>%
   setView(lng = mean(bcoord$lon), lat = mean(bcoord$lat), zoom = 9) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
