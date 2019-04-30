@@ -225,7 +225,7 @@ require(quantreg)
 
 par(pty="s")
 par(mfrow=c(1,1), mar=c(5,5,1,1))
-plot(bcount/6.25~exp(st)-1, xlab="AfSIS ensemble prediction", ylab="GeoSurvey building density", cex.lab=1.5, 
+plot(bcount/6.25~exp(st)-1, xlab="AfSIS ensemble prediction", ylab="GeoSurvey building density", cex.lab=1.3, 
      xlim=c(-1,50), ylim=c(-1,50), gsout)
 stQ <- rq(bcount/6.25~I(exp(st)-1), tau=c(0.05,0.5,0.95), data=gsout)
 print(stQ)
