@@ -233,3 +233,4 @@ curve(stQ$coefficients[2]*x+stQ$coefficients[1], add=T, from=0, to=50, col="blue
 curve(stQ$coefficients[4]*x+stQ$coefficients[3], add=T, from=0, to=50, col="red", lwd=1)
 curve(stQ$coefficients[6]*x+stQ$coefficients[5], add=T, from=0, to=50, col="blue", lwd=1)
 abline(c(0,1), col="grey", lwd=2)
+
