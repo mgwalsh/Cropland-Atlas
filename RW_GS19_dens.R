@@ -17,7 +17,7 @@ suppressPackageStartupMessages({
 # Data setup --------------------------------------------------------------
 # Run this first: https://github.com/mgwalsh/Cropland-Atlas/blob/master/RW_GS19_data.R
 rm(list=setdiff(ls(), c("gsdat","grids"))) ## scrubs extraneous objects in memory
-gsdat <- gsdat[complete.cases(gsdat[ ,c(17:49)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(17:54)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -32,11 +32,11 @@ gs_val <- gsdat[-gsIndex,]
 cp_cal <- log(((gs_cal$bcount)/6.25)+1) ## log transform of the building count data to buildings/ha
 
 # raster calibration features
-gf_cal <- gs_cal[,17:49]
+gf_cal <- gs_cal[,17:54]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,22:30,39]
+gf_cpv <- gs_cal[,22:30,44]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -181,7 +181,7 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 # stacking model validation labels and features
 cp_val <- gspred$bcount
 cp_val <- log(((gs_val$bcount)/6.25)+1)
-gf_val <- gspred[,50:54] ## subset validation features
+gf_val <- gspred[,55:59] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
