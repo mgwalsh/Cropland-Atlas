@@ -31,8 +31,8 @@ unzip("TZA_adm3.zip", overwrite = T)
 shape <- shapefile("TZA_adm3.shp")
 
 # download raster stack (note this is a big 1+ Gb download)
-download("https://www.dropbox.com/s/pshrtvjf7navegu/TZ_250m_2017.zip?raw=1", "TZ_250m_2017.zip", mode = "wb")
-unzip("TZ_250m_2017.zip", overwrite = T)
+download("https://www.dropbox.com/s/ejl3h62hojnhh3a/TZ_250m_2019.zip?raw=1", "TZ_250m_2019.zip", mode = "wb")
+unzip("TZ_250m_2019.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 
@@ -73,6 +73,23 @@ bp <- cbind(bp, bcount)
 geos <- rbind(ba, bp)
 geos <- geos[order(geos$id),] ## sort in original sample order
 
+# Cropland grid count -----------------------------------------------------
+cp <- geos[which(geos$CP == "Y"), ] ## identify quadrats with cropland
+cp$cgrid <- as.character(cp$cgrid)
+
+# number of tagged grid locations from quadrats with cropland
+ccount <- rep(NA, nrow(cp))
+for(i in 1:nrow(cp)) {
+  t <- fromJSON(cp$cgrid[i])
+  ccount[i] <- nrow(t$features)
+}
+ccount ## vector of number of buildings per quadrats with buildings
+ca <- geos[which(geos$CP == "N"), ]
+ca$ccount <- 0
+cp <- cbind(cp, ccount)
+geos <- rbind(ca, cp)
+geos <- geos[order(geos$id),] ## sort in original sample order
+
 # project GeoSurvey coords to grid CRS
 geos.proj <- as.data.frame(project(cbind(geos$lon, geos$lat), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
 colnames(geos.proj) <- c("x","y")
@@ -84,7 +101,7 @@ projection(geos) <- projection(grids)
 geosgrid <- extract(grids, geos)
 gsdat <- as.data.frame(cbind(geos, geosgrid)) 
 # gsdat <- gsdat[!duplicated(gsdat), ] ## removes any duplicates ... if needed
-gsdat <- gsdat[complete.cases(gsdat[ ,c(10:13,18:63)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(10:13,19:70)]),] ## removes incomplete cases
 gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens observer ID's
 
 # Write data frame --------------------------------------------------------
