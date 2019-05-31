@@ -73,7 +73,7 @@ bp <- cbind(bp, bcount)
 geos <- rbind(ba, bp)
 geos <- geos[order(geos$id),] ## sort in original sample order
 
-# Cropland grid count -----------------------------------------------------
+# cropland grid count
 cp <- geos[which(geos$CP == "Y"), ] ## identify quadrats with cropland
 cp$cgrid <- as.character(cp$cgrid)
 
@@ -83,7 +83,7 @@ for(i in 1:nrow(cp)) {
   t <- fromJSON(cp$cgrid[i])
   ccount[i] <- nrow(t$features)
 }
-ccount ## vector of number of buildings per quadrats with buildings
+ccount ## cropland grid count
 ca <- geos[which(geos$CP == "N"), ]
 ca$ccount <- 0
 cp <- cbind(cp, ccount)
