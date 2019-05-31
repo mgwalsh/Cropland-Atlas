@@ -71,6 +71,23 @@ bp <- cbind(bp, bcount)
 geos <- rbind(ba, bp)
 geos <- geos[order(geos$time),] ## sort in original sample order
 
+# cropland grid count
+# cp <- geos[which(geos$CP == "Y"), ] ## identify quadrats with cropland
+# cp$cgrid <- as.character(cp$cgrid)
+
+# number of tagged grid locations from quadrats with cropland
+# ccount <- rep(NA, nrow(cp))
+# for(i in 1:nrow(cp)) {
+#  t <- fromJSON(cp$cgrid[i])
+#  ccount[i] <- nrow(t$features)
+# }
+# ccount ## cropland grid count
+# ca <- geos[which(geos$CP == "N"), ]
+# ca$ccount <- 0
+# cp <- cbind(cp, ccount)
+# geos <- rbind(ca, cp)
+# geos <- geos[order(geos$id),] ## sort in original sample order
+
 # project GeoSurvey coords to grid CRS
 geos.proj <- as.data.frame(project(cbind(geos$lon, geos$lat), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
 colnames(geos.proj) <- c("x","y")
