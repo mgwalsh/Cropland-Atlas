@@ -2,7 +2,7 @@
 # M. Walsh, April 2018
 
 # Required packages
-# install.packages(c("devtools","caret","MASS","randomForest","gbm","nnet","glmnet","plyr","doParallel","dismo")), dependencies=T)
+# install.packages(c("devtools","caret","MASS","randomForest","gbm","nnet","plyr","doParallel","dismo")), dependencies=T)
 suppressPackageStartupMessages({
   require(devtools)
   require(caret)
@@ -10,34 +10,35 @@ suppressPackageStartupMessages({
   require(randomForest)
   require(gbm)
   require(nnet)
-  require(glmnet)
   require(plyr)
   require(doParallel)
   require(dismo)
 })
 
 # Data setup --------------------------------------------------------------
-# SourceURL <- "https://raw.githubusercontent.com/mgwalsh/blob/master/TZ_GS18_data.R"
-# source_url(SourceURL)
-rm(list=setdiff(ls(), c("gsdat","grids"))) ## scrub extraneous objects in memory
+# Run this first: https://github.com/mgwalsh/Cropland-Atlas/blob/master/RW_GS19_data.R
+rm(list=setdiff(ls(), c("gsdat","grids","glist"))) ## scrub extraneous objects in memory
+# gsdat <- gsdat[complete.cases(gsdat[ ,c(17:49)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
 set.seed(seed)
 
 # split data into calibration and validation sets
-gsdat <- gsdat[ which(gsdat$CP == 'Y'), ] ## selects observed croplands only
-gsIndex <- createDataPartition(gsdat$rice, p = 4/5, list = F, times = 1)
+gsIndex <- createDataPartition(gsdat$CP, p = 4/5, list = F, times = 1)
 gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$rice ## change this to include other dependent variables e.g, $BIC, $BP
+cp_cal <- gs_cal$CP
 
 # raster calibration features
-gf_cal <- gs_cal[,18:62]
+gf_cal <- gs_cal[,19:70]
 
-# Regularized regression <glmnet> -----------------------------------------
+# Central place theory model <glm> -----------------------------------------
+# select central place covariates
+gf_cpv <- gs_cal[,28:39]
+
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
 registerDoParallel(mc)
@@ -48,19 +49,46 @@ tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
 
 # model training
-rr <- train(gf_cal, cp_cal, 
-            method = "glmnet",
-            family = "binomial",
-            preProc = c("center","scale"), 
-            trControl = tc,
-            metric ="ROC")
+gl1 <- train(gf_cpv, cp_cal, 
+             method = "glmStepAIC",
+             family = "binomial",
+             preProc = c("center","scale"), 
+             trControl = tc,
+             metric ="ROC")
 
 # model outputs & predictions
-print(rr)
-plot(varImp(rr))
-rr.pred <- predict(grids, rr, type = "prob") ## spatial predictions
+summary(gl1)
+print(gl1) ## ROC's accross cross-validation
+gl1.pred <- predict(grids, gl1, type = "prob") ## spatial predictions
 
 stopCluster(mc)
+saveRDS(gl1, "./Results/gl1.rds")
+
+# GLM with all covariates -------------------------------------------------
+# start doParallel to parallelize model fitting
+mc <- makeCluster(detectCores())
+registerDoParallel(mc)
+
+# control setup
+set.seed(1385321)
+tc <- trainControl(method = "cv", classProbs = T,
+                   summaryFunction = twoClassSummary, allowParallel = T)
+
+# model training
+gl2 <- train(gf_cal, cp_cal, 
+             method = "glmStepAIC",
+             family = "binomial",
+             preProc = c("center","scale"), 
+             trControl = tc,
+             metric ="ROC")
+
+# model outputs & predictions
+summary(gl2)
+print(gl2) ## ROC's accross cross-validation
+gl2.pred <- predict(grids, gl2, type = "prob") ## spatial predictions
+
+stopCluster(mc)
+saveRDS(gl2, "./Results/gl2.rds")
 
 # Random forest <randomForest> --------------------------------------------
 # start doParallel to parallelize model fitting
@@ -84,10 +112,11 @@ rf <- train(gf_cal, cp_cal,
 
 # model outputs & predictions
 print(rf) ## ROC's accross tuning parameters
-plot(varImp(rf)) ## relative variable importance
+# plot(varImp(rf)) ## relative variable importance
 rf.pred <- predict(grids, rf, type = "prob") ## spatial predictions
 
 stopCluster(mc)
+saveRDS(rf, "./Results/rf.rds")
 
 # Generalized boosting <gbm> ----------------------------------------------
 # start doParallel to parallelize model fitting
@@ -100,8 +129,8 @@ tc <- trainControl(method = "cv", classProbs = T, summaryFunction = twoClassSumm
                    allowParallel = T)
 
 ## for initial <gbm> tuning guidelines see @ https://stats.stackexchange.com/questions/25748/what-are-some-useful-guidelines-for-gbm-parameters
-tg <- expand.grid(interaction.depth = seq(10,20, by=2), shrinkage = 0.01, n.trees = 501,
-                  n.minobsinnode = 25) ## model tuning steps
+tg <- expand.grid(interaction.depth = seq(2,5, by=1), shrinkage = 0.01, n.trees = seq(101,501, by=50),
+                  n.minobsinnode = 50) ## model tuning steps
 
 # model training
 gb <- train(gf_cal, cp_cal, 
@@ -117,6 +146,7 @@ plot(varImp(gb)) ## relative variable importance
 gb.pred <- predict(grids, gb, type = "prob") ## spatial predictions
 
 stopCluster(mc)
+saveRDS(gb, "./Results/gb.rds")
 
 # Neural network <nnet> ---------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -127,7 +157,7 @@ registerDoParallel(mc)
 set.seed(1385321)
 tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
-tg <- expand.grid(size = seq(6,14, by=2), decay = 0.01) ## model tuning steps
+tg <- expand.grid(size = seq(2,10, by=2), decay = c(0.001, 0.01, 0.1)) ## model tuning steps
 
 # model training
 nn <- train(gf_cal, cp_cal, 
@@ -143,10 +173,11 @@ plot(varImp(nn)) ## relative variable importance
 nn.pred <- predict(grids, nn, type = "prob") ## spatial predictions
 
 stopCluster(mc)
+saveRDS(nn, "./Results/nn.rds")
 
 # Model stacking setup ----------------------------------------------------
-preds <- stack(1-rr.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
-names(preds) <- c("rr","rf","gb","nn")
+preds <- stack(1-gl1.pred, 1-gl2.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
+names(preds) <- c("gl1","gl2","rf","gb","nn")
 plot(preds, axes = F)
 
 # extract model predictions
@@ -156,8 +187,8 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$rice ## change this to include other dependent variables e.g, $BP, $BIC
-gf_val <- gspred[,63:66] ## subset validation features
+cp_val <- gspred$CP ## change this to $BP, $WP ...
+gf_val <- gspred[,71:75] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -177,12 +208,13 @@ st <- train(gf_val, cp_val,
             trControl = tc)
 
 # model outputs & predictions
-summary(st)
+print(st)
 plot(varImp(st))
 st.pred <- predict(preds, st, type = "prob") ## spatial predictions
 plot(1-st.pred, axes = F)
 
 stopCluster(mc)
+saveRDS(st, "./Results/st.rds")
 
 # Receiver-operator characteristics ---------------------------------------
 cp_pre <- predict(st, gf_val, type="prob")
@@ -196,41 +228,21 @@ plot(cp_eval, 'ROC') ## plot ROC curve
 t <- threshold(cp_eval) ## calculate thresholds based on ROC
 r <- matrix(c(0, t[,1], 0, t[,1], 1, 1), ncol=3, byrow = T) ## set threshold value <kappa>
 mask <- reclassify(1-st.pred, r) ## reclassify stacked predictions
-plot(mask, axes=F, legend=F)
-
-# Validation performance measures -----------------------------------------
-perfv <- cp_val[,1:3]
-perfv$pred <- as.factor(ifelse(perfv$Y >= t[,1], c("Y"), c("N")))
-colnames(perfv) <- c("obs","N","Y","pred")
-confusionMatrix(data = perfv$pred, reference = perfv$obs, positive = "Y")
+plot(mask, axes=F)
 
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
-names(gspreds) <- c("rr","rf","gb","nn","st","mk")
-# change this to include other dependent variables e.g, $BP, $BIC
-writeRaster(gspreds, filename="./Results/TZ_rice_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
+names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
+writeRaster(gspreds, filename="./Results/TZ_CP_preds_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-# change the below to include other dependent variables e.g, $BIC, $BP
-write.csv(gsout, "./Results/TZ_rice_out.csv", row.names = F) ## ... change feature names here
-
-# Overall performance measures --------------------------------------------
-perf <- gsout[,c(13,68,67)]
-perf$mk <- as.factor(ifelse(perf$mk == 1, c("Y"), c("N")))
-perf$N <- 1-perf$st
-colnames(perf) <- c("obs","pred","Y","N")
-confusionMatrix(data = perf$pred, reference = perf$obs, positive = "Y")
-
-# Regional summaries ------------------------------------------------------
-require(arm)
-gadm.lme <- glmer(rice~mk+(mk|region), family=binomial, data=gsout)
-display(gadm.lme)
-gadm.ran <- ranef(gadm.lme) ## extract random effects
-gadm.ses <- se.coef(gadm.lme) ## extract standard errors on random effects
+gsout$mzone <- ifelse(gsout$mk == 1, "Y", "N")
+confusionMatrix(data = gsout$mzone, reference = gsout$CP, positive = "Y")
+write.csv(gsout, "./Results/TZ_CP_out.csv", row.names = F) ## ... change feature names here if needed
 
 # Prediction map widget ---------------------------------------------------
 pred <- 1-st.pred ## GeoSurvey ensemble probability
@@ -238,8 +250,7 @@ pal <- colorBin("Greens", domain = 0:1) ## set color palette
 w <- leaflet() %>% 
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 6) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
-  addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
-  addLegend(pal = pal, values = values(pred), title = "Probability")
+  addRasterImage(pred, colors = pal, opacity = 0.4, maxBytes=6000000) %>%
+  addLegend(pal = pal, values = values(pred), title = "Cropland prob.")
 w ## plot widget 
-saveWidget(w, 'TZ_rice_prob.html', selfcontained = T) ## save html ... change feature names here
-
+saveWidget(w, 'TZ_CP_2018.html', selfcontained = T) ## save html ... change feature names here
