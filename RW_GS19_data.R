@@ -41,7 +41,7 @@ projection(geos) <- projection(shape)
 gadm <- geos %over% shape
 geos <- as.data.frame(geos)
 geos <- cbind(gadm[ ,c(4,6,8,10,12)], geos)
-colnames(geos) <- c("region","district","sector","cell", "village","time","observer","id","lat","lon","BP","CP","TP","WP","bloc")
+colnames(geos) <- c("region","district","sector","cell", "village","time","observer","id","lat","lon","BP","CP","TP","WP","bloc","cgrid")
 
 # Coordinates and number of buildings per quadrat -------------------------
 bp <- geos[which(geos$BP == "Y"), ] ## identify quadrats with buildings
@@ -72,21 +72,21 @@ geos <- rbind(ba, bp)
 geos <- geos[order(geos$time),] ## sort in original sample order
 
 # cropland grid count
-# cp <- geos[which(geos$CP == "Y"), ] ## identify quadrats with cropland
-# cp$cgrid <- as.character(cp$cgrid)
+cp <- geos[which(geos$CP == "Y"), ] ## identify quadrats with cropland
+cp$cgrid <- as.character(cp$cgrid)
 
 # number of tagged grid locations from quadrats with cropland
-# ccount <- rep(NA, nrow(cp))
-# for(i in 1:nrow(cp)) {
-#  t <- fromJSON(cp$cgrid[i])
-#  ccount[i] <- nrow(t$features)
-# }
-# ccount ## cropland grid count
-# ca <- geos[which(geos$CP == "N"), ]
-# ca$ccount <- 0
-# cp <- cbind(cp, ccount)
-# geos <- rbind(ca, cp)
-# geos <- geos[order(geos$id),] ## sort in original sample order
+ccount <- rep(NA, nrow(cp))
+for(i in 1:nrow(cp)) {
+  t <- fromJSON(cp$cgrid[i])
+  ccount[i] <- nrow(t$features)
+}
+ccount ## cropland grid count
+ca <- geos[which(geos$CP == "N"), ]
+ca$ccount <- 0
+cp <- cbind(cp, ccount)
+geos <- rbind(ca, cp)
+geos <- geos[order(geos$time),] ## sort in original sample order
 
 # project GeoSurvey coords to grid CRS
 geos.proj <- as.data.frame(project(cbind(geos$lon, geos$lat), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
