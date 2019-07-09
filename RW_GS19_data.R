@@ -97,7 +97,8 @@ projection(geos) <- projection(grids)
 
 # extract gridded variables at GeoSurvey locations
 geosgrid <- extract(grids, geos)
-gsdat <- as.data.frame(cbind(geos, geosgrid)) 
+gsdat <- as.data.frame(cbind(geos, geosgrid))
+gsdat <- gsdat[ which(gsdat$ccount < 17), ]
 
 # Write data frame --------------------------------------------------------
 dir.create("Results", showWarnings = F)
