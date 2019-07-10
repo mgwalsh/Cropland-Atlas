@@ -136,14 +136,14 @@ par(pty="s", mar=c(10,10,1,1))
 coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-0.2,0.2), CI=2, main="") ## district coefficient plot
 write.csv(sae, "./Results/RW_bcount_sae.csv", row.names = F)
 
-# Building count map widget
-pred <- m8.pred ## GeoSurvey building counts
+# Building density map widget
+pred <- m8.pred ## GeoSurvey building densities
 pal <- colorBin("Reds", domain = 0:250, na.color = "light grey") ## set color palette
 w <- leaflet() %>% 
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 9) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
-  addLegend(pal = pal, values = values(pred), title = "Cropland area (%)")
+  addLegend(pal = pal, values = values(pred), title = "Building density")
 w ## plot widget 
 saveWidget(w, 'RW_bcount.html', selfcontained = T)
 
