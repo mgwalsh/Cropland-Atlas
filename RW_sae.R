@@ -96,17 +96,6 @@ gspreds <- stack(m1.pred, m2.pred)
 names(gspreds) <- c("m1","m2")
 writeRaster(gspreds, filename="./Results/TZ_cp_area.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
-# Cropland area map widget
-pred <- m2.pred*100 ## GeoSurvey cropland percentage
-pal <- colorBin("Reds", domain = 0:100, na.color = "light grey") ## set color palette
-w <- leaflet() %>% 
-  setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 9) %>%
-  addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
-  addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
-  addLegend(pal = pal, values = values(pred), title = "Cropland area (%)")
-w ## plot widget 
-saveWidget(w, 'RW_cp_area.html', selfcontained = T)
-
 # Building count models ---------------------------------------------------
 # Poisson models of GeoSurvey building counts
 # bp <-  gsdat[which(gsdat$BP=='Y'), ] ## actual settlement observations only
@@ -147,8 +136,19 @@ par(pty="s", mar=c(10,10,1,1))
 coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-0.2,0.2), CI=2, main="") ## district coefficient plot
 write.csv(sae, "./Results/RW_bcount_sae.csv", row.names = F)
 
+# Building count map widget
+pred <- m8.pred ## GeoSurvey building counts
+pal <- colorBin("Reds", domain = 0:250, na.color = "light grey") ## set color palette
+w <- leaflet() %>% 
+  setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 9) %>%
+  addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
+  addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
+  addLegend(pal = pal, values = values(pred), title = "Cropland area (%)")
+w ## plot widget 
+saveWidget(w, 'RW_bcount.html', selfcontained = T)
+
 # Write prediction grids
-gspreds <- stack(m1.pred, m2.pred, m7.pred, m8.pred)
-names(gspreds) <- c("m1","m2","m7","m8")
-writeRaster(gspreds, filename="./Results/RW_sae.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+gspreds <- stack(m7.pred, m8.pred)
+names(gspreds) <- c("m7","m8")
+writeRaster(gspreds, filename="./Results/RW_BC.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
