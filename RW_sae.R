@@ -47,7 +47,7 @@ gsdat <- gsdat[c(1:63)]
 
 # Write data frame --------------------------------------------------------
 dir.create("Results", showWarnings = F)
-write.csv(gsdat, "./Results/TZ_sae.csv", row.names = F)
+write.csv(gsdat, "./Results/RW_sae.csv", row.names = F)
 
 # Cropland area models ----------------------------------------------------
 # binomial models of GeoSurvey cropland grid counts
