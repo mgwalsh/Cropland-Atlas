@@ -60,7 +60,6 @@ summary(m0 <- glm(cbind(ccount, 16-ccount) ~ 1, family=binomial, gsdat)) ## mean
 summary(m1 <- glm(cbind(ccount, 16-ccount) ~ CP19, family=binomial, gsdat)) ## scaling model
 (est1 <- cbind(Estimate = coef(m1), confint(m1))) ## standard 95% confidence intervals
 m1.pred <- predict(grids, m1, type="response")
-(m1.area <- cellStats(m1.pred*6.25, sum)) ## calculates total cropland area (ha)
 plot(m1.pred, axes=F)
 gsdat$m1 <- predict(m1, gsdat, type="response")
 
@@ -69,12 +68,16 @@ summary(m2 <- glm(cbind(ccount, 16-ccount) ~ BC19+BP19+CP19+TP19+WP19, family=bi
 (est2 <- cbind(Estimate = coef(m2), confint(m2))) ## standard 95% confidence intervals
 anova(m1, m2) ## model comparison
 m2.pred <- predict(grids, m2, type="response")
-(m2.area <- cellStats(m2.pred*6.25, sum)) ## calculates total cropland area (ha)
 plot(m2.pred, axes=F)
 gsdat$m2 <- predict(m2, gsdat, type="response")
 
+# Write prediction grids
+gspreds <- stack(m1.pred, m2.pred)
+names(gspreds) <- c("m1","m2")
+writeRaster(gspreds, filename="./Results/TZ_cp_area.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+
 # Small area estimates (SAE)
-# post-stratified by districts
+# post-stratified by admin units
 summary(m3 <- glmer(cbind(ccount, 16-ccount) ~ 1 + (1|district), family=binomial, gsdat))
 summary(m4 <- glmer(cbind(ccount, 16-ccount) ~ 1 + (1|district/sector), family=binomial, gsdat))
 
@@ -90,11 +93,6 @@ par(pty="s", mar=c(10,10,1,1))
 coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-1,1), CI=2, main="") ## district coefficient plot
 dev.off()
 write.csv(sae, "./Results/RW_crop_area_sae.csv", row.names = F)
-
-# Write prediction grids
-gspreds <- stack(m1.pred, m2.pred)
-names(gspreds) <- c("m1","m2")
-writeRaster(gspreds, filename="./Results/TZ_cp_area.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Building count models ---------------------------------------------------
 # Poisson models of GeoSurvey building counts
@@ -119,8 +117,13 @@ m8.pred <- predict(grids, m8, type="response")
 plot(m8.pred, axes=F)
 gsdat$m8 <- predict(m8, gsdat, type="response")
 
+# Write prediction grids
+gspreds <- stack(m7.pred, m8.pred)
+names(gspreds) <- c("m7","m8")
+writeRaster(gspreds, filename="./Results/RW_BC.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+
 # Small area estimates (SAE)
-# post-stratified by districts
+# post-stratified by admin units
 summary(m9 <- glmer(bcount ~ 1 + (1|district), family=poisson, gsdat))
 summary(m10 <- glmer(bcount ~ 1 + (1|district/sector), family=poisson, gsdat))
 
@@ -146,9 +149,4 @@ w <- leaflet() %>%
   addLegend(pal = pal, values = values(pred), title = "Building density")
 w ## plot widget 
 saveWidget(w, 'RW_bcount.html', selfcontained = T)
-
-# Write prediction grids
-gspreds <- stack(m7.pred, m8.pred)
-names(gspreds) <- c("m7","m8")
-writeRaster(gspreds, filename="./Results/RW_BC.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
