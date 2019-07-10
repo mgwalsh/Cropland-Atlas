@@ -137,8 +137,8 @@ coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-0.2,0.2), CI=
 write.csv(sae, "./Results/RW_bcount_sae.csv", row.names = F)
 
 # Building density map widget
-pred <- m8.pred ## GeoSurvey building densities
-pal <- colorBin("Reds", domain = 0:250, na.color = "light grey") ## set color palette
+pred <- m8.pred/6.25 ## GeoSurvey building densities
+pal <- colorBin("Reds", domain = 0:50, na.color = "light grey") ## set color palette
 w <- leaflet() %>% 
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 9) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
