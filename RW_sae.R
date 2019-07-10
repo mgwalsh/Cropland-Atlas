@@ -105,7 +105,7 @@ w <- leaflet() %>%
   addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
   addLegend(pal = pal, values = values(pred), title = "Cropland area (%)")
 w ## plot widget 
-saveWidget(w, 'TZ_cp_area.html', selfcontained = T)
+saveWidget(w, 'RW_cp_area.html', selfcontained = T)
 
 # Building count models ---------------------------------------------------
 # Poisson models of GeoSurvey building counts
