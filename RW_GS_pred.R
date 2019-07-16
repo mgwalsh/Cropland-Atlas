@@ -18,7 +18,7 @@ suppressPackageStartupMessages({
 # Data setup --------------------------------------------------------------
 # Run this first: https://github.com/mgwalsh/Cropland-Atlas/blob/master/RW_GS19_data.R
 rm(list=setdiff(ls(), c("gsdat","grids","glist"))) ## scrub extraneous objects in memory
-gsdat <- gsdat[complete.cases(gsdat[ ,c(17:49)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(19:56)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -33,11 +33,11 @@ gs_val <- gsdat[-gsIndex,]
 cp_cal <- gs_cal$BP
 
 # raster calibration features
-gf_cal <- gs_cal[,17:49]
+gf_cal <- gs_cal[,19:56]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,22:30,39]
+gf_cpv <- gs_cal[,24:32,46]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -60,7 +60,6 @@ gl1 <- train(gf_cpv, cp_cal,
 summary(gl1)
 print(gl1) ## ROC's accross cross-validation
 gl1.pred <- predict(grids, gl1, type = "prob") ## spatial predictions
-
 stopCluster(mc)
 saveRDS(gl1, "./Results/gl1.rds")
 
@@ -86,7 +85,6 @@ gl2 <- train(gf_cal, cp_cal,
 summary(gl2)
 print(gl2) ## ROC's accross cross-validation
 gl2.pred <- predict(grids, gl2, type = "prob") ## spatial predictions
-
 stopCluster(mc)
 saveRDS(gl2, "./Results/gl2.rds")
 
@@ -114,7 +112,6 @@ rf <- train(gf_cal, cp_cal,
 print(rf) ## ROC's accross tuning parameters
 plot(varImp(rf)) ## relative variable importance
 rf.pred <- predict(grids, rf, type = "prob") ## spatial predictions
-
 stopCluster(mc)
 saveRDS(rf, "./Results/rf.rds")
 
@@ -144,7 +141,6 @@ gb <- train(gf_cal, cp_cal,
 print(gb) ## ROC's accross tuning parameters
 plot(varImp(gb)) ## relative variable importance
 gb.pred <- predict(grids, gb, type = "prob") ## spatial predictions
-
 stopCluster(mc)
 saveRDS(gb, "./Results/gb.rds")
 
@@ -171,7 +167,6 @@ nn <- train(gf_cal, cp_cal,
 print(nn) ## ROC's accross tuning parameters
 plot(varImp(nn)) ## relative variable importance
 nn.pred <- predict(grids, nn, type = "prob") ## spatial predictions
-
 stopCluster(mc)
 saveRDS(nn, "./Results/nn.rds")
 
@@ -188,7 +183,7 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
 cp_val <- gspred$BP ## change this to $CP, $WP ...
-gf_val <- gspred[,50:54] ## subset validation features
+gf_val <- gspred[,57:61] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -212,7 +207,6 @@ print(st)
 plot(varImp(st))
 st.pred <- predict(preds, st, type = "prob") ## spatial predictions
 plot(1-st.pred, axes = F)
-
 stopCluster(mc)
 saveRDS(st, "./Results/st.rds")
 
