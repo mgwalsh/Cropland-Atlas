@@ -91,7 +91,6 @@ sae <- as.data.frame(cbind(ran$district, ses$district)) ## regional-level small 
 colnames(sae) <- c("ran","se")
 par(pty="s", mar=c(10,10,1,1))
 coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-1,1), CI=2, main="") ## district coefficient plot
-dev.off()
 write.csv(sae, "./Results/RW_crop_area_sae.csv", row.names = F)
 
 # Building count models ---------------------------------------------------
@@ -106,6 +105,7 @@ anova(m6, mnb)
 summary(m7 <- glm(bcount ~ BC19, family=poisson, gsdat)) ## scaling model
 (est7 <- cbind(Estimate = coef(m7), confint(m7))) ## standard 95% confidence intervals
 m7.pred <- predict(grids, m7, type="response")
+dev.off()
 plot(m7.pred, axes=F)
 gsdat$m7 <- predict(m7, gsdat, type="response")
 
@@ -141,7 +141,7 @@ write.csv(sae, "./Results/RW_bcount_sae.csv", row.names = F)
 
 # Building density map widget
 pred <- m8.pred/6.25 ## GeoSurvey building densities
-pal <- colorBin("Reds", domain = 0:50, na.color = "light grey") ## set color palette
+pal <- colorBin("Reds", domain = 0:maxValue(pred), na.color = "light grey") ## set color palette
 w <- leaflet() %>% 
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 9) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
@@ -149,4 +149,3 @@ w <- leaflet() %>%
   addLegend(pal = pal, values = values(pred), title = "Building density")
 w ## plot widget 
 saveWidget(w, 'RW_bcount.html', selfcontained = T)
-
