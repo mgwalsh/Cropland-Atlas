@@ -16,8 +16,8 @@ suppressPackageStartupMessages({
 
 # Data setup --------------------------------------------------------------
 # Run this first: https://github.com/mgwalsh/Cropland-Atlas/blob/master/RW_GS19_data.R
-rm(list=setdiff(ls(), c("gsdat","grids"))) ## scrubs extraneous objects in memory
-gsdat <- gsdat[complete.cases(gsdat[ ,c(17:54)]),] ## removes incomplete cases
+rm(list=setdiff(ls(), c("gsdat","grids"))) ## scrubs extraneous objects in memory)
+gsdat <- gsdat[complete.cases(gsdat[ ,c(17,19:56)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -29,14 +29,14 @@ gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- log(((gs_cal$bcount)/6.25)+1) ## log transform of the building count data to buildings/ha
+cp_cal <- log(gs_cal$bcount+1)
 
 # raster calibration features
-gf_cal <- gs_cal[,17:54]
+gf_cal <- gs_cal[,19:56]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,22:30,44]
+gf_cpv <- gs_cal[,24:32]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -58,7 +58,6 @@ gl1 <- train(gf_cpv, cp_cal,
 gl1
 summary(gl1)
 gl1.pred <- predict(grids, gl1) ## spatial predictions
-
 stopCluster(mc)
 saveRDS(gl1, "./Results/gl1_bdens.rds")
 
@@ -83,7 +82,6 @@ gl2 <- train(gf_cal, cp_cal,
 gl2
 summary(gl2)
 gl2.pred <- predict(grids, gl2) ## spatial predictions
-
 stopCluster(mc)
 saveRDS(gl2, "./Results/gl2_bdens.rds")
 
@@ -107,9 +105,7 @@ rf <- train(gf_cal, cp_cal,
 
 # model outputs & predictions
 print(rf) ## RMSEs accross tuning parameters
-plot(varImp(rf)) ## relative variable importance
 rf.pred <- predict(grids, rf) ## spatial predictions
-
 stopCluster(mc)
 saveRDS(rf, "./Results/rf_bdens.rds")
 
@@ -135,9 +131,7 @@ gb <- train(gf_cal, cp_cal,
 
 # model outputs & predictions
 print(gb) ## RMSEs accross tuning parameters
-plot(varImp(gb)) ## relative variable importance
-gb.pred <- predict(grids, gb) ## spatial predictions
-
+gb.pred <- exp(predict(grids, gb))-1 ## spatial predictions
 stopCluster(mc)
 saveRDS(gb, "./Results/gb_bdens.rds")
 
@@ -162,15 +156,13 @@ nn <- train(gf_cal, cp_cal,
 # model outputs & predictions
 print(nn) ## RMSEs accross tuning parameters
 plot(varImp(nn)) ## relative variable importance
-nn.pred <- predict(grids, nn) ## spatial predictions
-
+nn.pred <- exp(predict(grids, nn))-1 ## spatial predictions
 stopCluster(mc)
 saveRDS(nn, "./Results/nn_bdens.rds")
 
 # Model stacking setup ----------------------------------------------------
 preds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred)
 names(preds) <- c("gl1","gl2","rf","gb","nn")
-plot(preds, axes = F)
 
 # extract model predictions
 coordinates(gs_val) <- ~x+y
@@ -178,38 +170,22 @@ projection(gs_val) <- projection(preds)
 gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
-# stacking model validation labels and features
-cp_val <- gspred$bcount
-cp_val <- log(((gs_val$bcount)/6.25)+1)
-gf_val <- gspred[,55:59] ## subset validation features
-
 # Model stacking ----------------------------------------------------------
-# start doParallel to parallelize model fitting
-mc <- makeCluster(detectCores())
-registerDoParallel(mc)
+# negative binomial model
+summary(st1 <- glm.nb(bcount ~ gl1+gl2+rf+gb+nn, gspred))
+(est1 <- cbind(Estimate = coef(st1), confint(st1))) ## standard 95% confidence intervals
+st1.pred <- predict(preds, st, type="response")
+plot(st1.pred, axes=F)
 
-# control setup
-set.seed(1385321)
-tc <- trainControl(method = "cv", allowParallel = T)
-
-# model training
-st <- train(gf_val, cp_val,
-            method = "glm",
-            trControl = tc)
-
-# model outputs & predictions
-st
-summary(st)
-plot(varImp(st))
-st.pred <- predict(preds, st) ## spatial predictions
-plot(st.pred, axes = F)
-
-stopCluster(mc)
-saveRDS(st, "./Results/st_bdens.rds")
+# poisson model
+summary(st2 <- glm(bcount ~ gl1+gl2+rf+gb+nn, family=poisson, gspred))
+(est2 <- cbind(Estimate = coef(st2), confint(st2))) ## standard 95% confidence intervals
+st2.pred <- predict(preds, st2, type="response")
+plot(st2.pred, axes=F)
 
 # Write prediction grids --------------------------------------------------
-gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, st.pred)
-names(gspreds) <- c("gl1","gl2","rf","gb","nn","st")
+gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, st1.pred, st2.pred)
+names(gspreds) <- c("gl1","gl2","rf","gb","nn","st1","st2")
 writeRaster(gspreds, filename="./Results/RW_bcount_2019.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
@@ -225,12 +201,12 @@ require(quantreg)
 
 par(pty="s")
 par(mfrow=c(1,1), mar=c(5,5,1,1))
-plot(bcount/6.25~exp(st)-1, xlab="Ensemble prediction", ylab="GeoSurvey building density", cex.lab=1.3, 
-     xlim=c(-1,50), ylim=c(-1,50), gsout)
-stQ <- rq(bcount/6.25~I(exp(st)-1), tau=c(0.05,0.5,0.95), data=gsout)
+plot(bcount~st2, xlab="Ensemble prediction", ylab="GeoSurvey building density", cex.lab=1.3, 
+     xlim=c(-1,300), ylim=c(-1,300), gsout)
+stQ <- rq(bcount~st2, tau=c(0.05,0.5,0.95), data=gsout)
 print(stQ)
-curve(stQ$coefficients[2]*x+stQ$coefficients[1], add=T, from=0, to=50, col="blue", lwd=1)
-curve(stQ$coefficients[4]*x+stQ$coefficients[3], add=T, from=0, to=50, col="red", lwd=1)
-curve(stQ$coefficients[6]*x+stQ$coefficients[5], add=T, from=0, to=50, col="blue", lwd=1)
+curve(stQ$coefficients[2]*x+stQ$coefficients[1], add=T, from=0, to=300, col="blue", lwd=1)
+curve(stQ$coefficients[4]*x+stQ$coefficients[3], add=T, from=0, to=300, col="red", lwd=1)
+curve(stQ$coefficients[6]*x+stQ$coefficients[5], add=T, from=0, to=300, col="blue", lwd=1)
 abline(c(0,1), col="grey", lwd=2)
 
