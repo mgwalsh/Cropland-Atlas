@@ -128,7 +128,7 @@ summary(m9 <- glmer(bcount ~ 1 + (1|district), family=poisson, gsdat))
 summary(m10 <- glmer(bcount ~ 1 + (1|district/sector), family=poisson, gsdat))
 
 # +additional LCC covariates
-summary(m11 <- glmer(bcount ~ BC19+BP19+CP19+TP19+WP19 + (1|district), family=poisson, gsdat))
+summary(m11 <- glmer(bcount ~ BP19+CP19+TP19+WP19 + (1|district), family=poisson, gsdat))
 anova(m9, m11) ## model comparison
 ran <- ranef(m11) ## extract district random effects
 ses <- se.coef(m11) ## extract district standard errors
@@ -136,7 +136,7 @@ nam <- rownames(ran$district)
 sae <- as.data.frame(cbind(ran$district, ses$district)) ## district-level small area estimates
 colnames(sae) <- c("ran","se")
 par(pty="s", mar=c(10,10,1,1))
-coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-0.2,0.2), CI=2, main="") ## district coefficient plot
+coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-0.6,0.6), CI=2, main="") ## district coefficient plot
 write.csv(sae, "./Results/RW_bcount_sae.csv", row.names = F)
 
 # Building density map widget
