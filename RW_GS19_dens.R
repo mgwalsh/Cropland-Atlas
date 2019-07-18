@@ -174,7 +174,7 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 # negative binomial model
 summary(st1 <- glm.nb(bcount ~ gl1+gl2+rf+gb+nn, gspred))
 (est1 <- cbind(Estimate = coef(st1), confint(st1))) ## standard 95% confidence intervals
-st1.pred <- predict(preds, st, type="response")
+st1.pred <- predict(preds, st1, type="response")
 plot(st1.pred, axes=F)
 
 # poisson model
