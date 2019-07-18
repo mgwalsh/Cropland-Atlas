@@ -64,7 +64,7 @@ plot(m1.pred, axes=F)
 gsdat$m1 <- predict(m1, gsdat, type="response")
 
 # +additional LCC covariates
-summary(m2 <- glm(cbind(ccount, 16-ccount) ~ BC19+BP19+CP19+TP19+WP19, family=binomial, gsdat))
+summary(m2 <- glm(cbind(ccount, 16-ccount) ~ BP19+CP19+WP19, family=binomial, gsdat))
 (est2 <- cbind(Estimate = coef(m2), confint(m2))) ## standard 95% confidence intervals
 anova(m1, m2) ## model comparison
 m2.pred <- predict(grids, m2, type="response")
@@ -102,7 +102,7 @@ summary(mnb <- glm.nb(bcount ~ 1, gsdat)) ## overdispersed negative binomial mod
 anova(m6, mnb)
 
 # with building count prediction (BC19)
-summary(m7 <- glm(bcount ~ BC19, family=poisson, gsdat)) ## scaling model
+summary(m7 <- glm(bcount ~ BP19, family=poisson, gsdat)) ## scaling model
 (est7 <- cbind(Estimate = coef(m7), confint(m7))) ## standard 95% confidence intervals
 m7.pred <- predict(grids, m7, type="response")
 dev.off()
@@ -110,7 +110,7 @@ plot(m7.pred, axes=F)
 gsdat$m7 <- predict(m7, gsdat, type="response")
 
 # +additional LCC covariates
-summary(m8 <- glm(bcount ~ BC19+BP19+CP19+TP19+WP19, family=poisson, gsdat))
+summary(m8 <- glm(bcount ~ BP19+CP19+WP19, family=poisson, gsdat))
 (est2 <- cbind(Estimate = coef(m8), confint(m8))) ## standard 95% confidence intervals
 anova(m7, m8) ## model comparison
 m8.pred <- predict(grids, m8, type="response")
@@ -128,7 +128,7 @@ summary(m9 <- glmer(bcount ~ 1 + (1|district), family=poisson, gsdat))
 summary(m10 <- glmer(bcount ~ 1 + (1|district/sector), family=poisson, gsdat))
 
 # +additional LCC covariates
-summary(m11 <- glmer(bcount ~ BP19+CP19+TP19+WP19 + (1|district), family=poisson, gsdat))
+summary(m11 <- glmer(bcount ~ BP19+CP19+WP19 + (1|district), family=poisson, gsdat))
 anova(m9, m11) ## model comparison
 ran <- ranef(m11) ## extract district random effects
 ses <- se.coef(m11) ## extract district standard errors
@@ -140,7 +140,7 @@ coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-0.6,0.6), CI=
 write.csv(sae, "./Results/RW_bcount_sae.csv", row.names = F)
 
 # Building density map widget
-pred <- m8.pred/6.25 ## GeoSurvey building densities
+pred <- m8.pred/6.25 ## GeoSurvey building densities (per ha)
 pal <- colorBin("Reds", domain = 0:maxValue(pred), na.color = "light grey") ## set color palette
 w <- leaflet() %>% 
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 9) %>%
