@@ -82,7 +82,7 @@ summary(m3 <- glmer(cbind(ccount, 16-ccount) ~ 1 + (1|district), family=binomial
 summary(m4 <- glmer(cbind(ccount, 16-ccount) ~ 1 + (1|district/sector), family=binomial, gsdat))
 
 # +additional LCC covariates
-summary(m5 <- glmer(cbind(ccount, 16-ccount) ~ BC19+BP19+CP19+TP19+WP19 + (1|district), family=binomial, gsdat))
+summary(m5 <- glmer(cbind(ccount, 16-ccount) ~ BP19+CP19+WP19 + (1|district), family=binomial, gsdat))
 anova(m3, m5) ## model comparison
 ran <- ranef(m5) ## extract regional random effects
 ses <- se.coef(m5) ## extract regional standard errors
@@ -101,7 +101,7 @@ summary(m6 <- glm(bcount ~ 1, family=poisson, gsdat)) ## country mean model
 summary(mnb <- glm.nb(bcount ~ 1, gsdat)) ## overdispersed negative binomial model
 anova(m6, mnb)
 
-# with building count prediction (BC19)
+# with building presence prediction (BP19)
 summary(m7 <- glm(bcount ~ BP19, family=poisson, gsdat)) ## scaling model
 (est7 <- cbind(Estimate = coef(m7), confint(m7))) ## standard 95% confidence intervals
 m7.pred <- predict(grids, m7, type="response")
