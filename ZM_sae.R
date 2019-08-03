@@ -136,7 +136,7 @@ coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-1,1), CI=2, m
 write.csv(sae, "./Results/ZM_bcount_sae.csv", row.names = F)
 
 # Building density map widget
-pred <- m7.pred ## GeoSurvey building densities (per ha)
+pred <- m7.pred/6.25 ## GeoSurvey building densities (per ha)
 pal <- colorBin("Reds", domain = 0:maxValue(pred), na.color = "light grey") ## set color palette
 w <- leaflet() %>% 
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 7) %>%
@@ -144,4 +144,4 @@ w <- leaflet() %>%
   addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
   addLegend(pal = pal, values = values(pred), title = "Building density")
 w ## plot widget 
-saveWidget(w, 'ZM_bcount.html', selfcontained = T)
+saveWidget(w, 'ZM_bcount_sae.html', selfcontained = T)
