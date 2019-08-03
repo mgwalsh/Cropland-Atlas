@@ -64,12 +64,12 @@ plot(m1.pred, axes=F)
 gsdat$m1 <- predict(m1, gsdat, type="response")
 
 # +additional LCC covariates
-summary(m2 <- glm(cbind(ccount, 16-ccount) ~ BP19+CP19+WP19, family=binomial, gsdat))
+summary(m2 <- glm(cbind(ccount, 16-ccount) ~ BP19*CP19*WP19, family=binomial, gsdat))
 (est2 <- cbind(Estimate = coef(m2), confint(m2))) ## standard 95% confidence intervals
 anova(m1, m2) ## model comparison
 m2.pred <- predict(grids, m2, type="response")
 plot(m2.pred, axes=F)
-gsdat$m2 <- predict(m2, gsdat, type="response")
+# gsdat$m2 <- predict(m2, gsdat, type="response")
 
 # Write prediction grids
 gspreds <- stack(m1.pred, m2.pred)
@@ -81,7 +81,7 @@ writeRaster(gspreds, filename="./Results/ZM_cp_area.tif", datatype="FLT4S", opti
 summary(m3 <- glmer(cbind(ccount, 16-ccount) ~ 1 + (1|district), family=binomial, gsdat))
 
 # +additional LCC covariates
-summary(m4 <- glmer(cbind(ccount, 16-ccount) ~ BM19*CM19*WM19 + (1|district), family=binomial, gsdat))
+summary(m4 <- glmer(cbind(ccount, 16-ccount) ~ BP19*CP19*WP19 + (1|district), family=binomial, gsdat))
 ran <- ranef(m4) ## extract regional random effects
 ses <- se.coef(m4) ## extract regional standard errors
 nam <- rownames(ran$district)
@@ -105,27 +105,26 @@ summary(m6 <- glm(bcount ~ BM19, family=poisson, gsdat)) ## scaling model
 m6.pred <- predict(grids, m6, type="response")
 dev.off()
 plot(m6.pred, axes=F)
-gsdat$m6 <- predict(m6, gsdat, type="response")
+# gsdat$m6 <- predict(m6, gsdat, type="response")
 
 # +additional LCC covariates
-summary(m7 <- glm(bcount ~ BM19+CM19+WM19, family=poisson, gsdat))
-(est2 <- cbind(Estimate = coef(m7), confint(m7))) ## standard 95% confidence intervals
-anova(m6, m7) ## model comparison
+summary(m7 <- glm(bcount ~ BP19*CP19*WP19, family=poisson, gsdat))
+(est7 <- cbind(Estimate = coef(m7), confint(m7))) ## standard 95% confidence intervals
 m7.pred <- predict(grids, m7, type="response")
 plot(m7.pred, axes=F)
-gsdat$m7 <- predict(m7, gsdat, type="response")
+# gsdat$m7 <- predict(m7, gsdat, type="response")
 
 # Write prediction grids
 gspreds <- stack(m6.pred, m7.pred)
 names(gspreds) <- c("m6","m7")
-writeRaster(gspreds, filename="./Results/ZM_BC.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/ZM_bcount_sae.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Small area estimates (SAE)
 # post-stratified by admin units (72 districts)
 summary(m8 <- glmer(bcount ~ 1 + (1|district), family=poisson, gsdat))
 
 # +additional LCC covariates
-summary(m9 <- glmer(bcount ~ BM19+CM19+WM19 + (1|district), family=poisson, gsdat))
+summary(m9 <- glmer(bcount ~ BP19*CP19*WP19 + (1|district), family=poisson, gsdat))
 anova(m8, m9) ## model comparison
 ran <- ranef(m9) ## extract district random effects
 ses <- se.coef(m9) ## extract district standard errors
