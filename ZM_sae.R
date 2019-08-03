@@ -29,7 +29,7 @@ download("https://www.dropbox.com/s/ks5eg6grmodl17g/ZM_GS_preds.zip?raw=1", "ZM_
 unzip("ZM_GS_preds.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
-(gave <- cellStats(grids, mean)) ## calculates mean grids values
+# (gave <- cellStats(grids, mean)) ## calculates mean grids values
 
 # project GeoSurvey coords to grid CRS
 geos.proj <- as.data.frame(project(cbind(geos$lon, geos$lat), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
@@ -61,7 +61,7 @@ summary(m1 <- glm(cbind(ccount, 16-ccount) ~ CP19, family=binomial, gsdat)) ## s
 (est1 <- cbind(Estimate = coef(m1), confint(m1))) ## standard 95% confidence intervals
 m1.pred <- predict(grids, m1, type="response")
 plot(m1.pred, axes=F)
-gsdat$m1 <- predict(m1, gsdat, type="response")
+# gsdat$m1 <- predict(m1, gsdat, type="response")
 
 # +additional LCC covariates
 summary(m2 <- glm(cbind(ccount, 16-ccount) ~ BP19*CP19*WP19, family=binomial, gsdat))
@@ -74,7 +74,7 @@ plot(m2.pred, axes=F)
 # Write prediction grids
 gspreds <- stack(m1.pred, m2.pred)
 names(gspreds) <- c("m1","m2")
-writeRaster(gspreds, filename="./Results/ZM_cp_area.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/ZM_cp_sae.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Small area estimates (SAE)
 # post-stratified by admin units
@@ -112,7 +112,7 @@ summary(m7 <- glm(bcount ~ BP19*CP19*WP19, family=poisson, gsdat))
 (est7 <- cbind(Estimate = coef(m7), confint(m7))) ## standard 95% confidence intervals
 m7.pred <- predict(grids, m7, type="response")
 plot(m7.pred, axes=F)
-# gsdat$m7 <- predict(m7, gsdat, type="response")
+gsdat$m7 <- predict(m7, gsdat, type="response")
 
 # Write prediction grids
 gspreds <- stack(m6.pred, m7.pred)
