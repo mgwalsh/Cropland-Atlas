@@ -1,5 +1,5 @@
 # Zambia 2019 GeoSurvey 250m small area estimates (SAE)
-# M. Walsh, July 2019
+# M. Walsh, August 2019
 
 # Required packages
 # install.packages(c("downloader","rgdal","raster","MASS","arm",leaflet","htmlwidgets")), dependencies=TRUE)
