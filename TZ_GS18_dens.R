@@ -33,11 +33,11 @@ gs_val <- gsdat[-gsIndex,]
 cp_cal <- log(((gs_cal$bcount)/6.25)+1) ## log transform of the building count data to buildings/ha
 
 # raster calibration features
-gf_cal <- gs_cal[,18:63]
+gf_cal <- gs_cal[,19:67]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,27:37]
+gf_cpv <- gs_cal[,26:37]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -59,8 +59,8 @@ gl1 <- train(gf_cpv, cp_cal,
 gl1
 summary(gl1)
 gl1.pred <- predict(grids, gl1) ## spatial predictions
-
 stopCluster(mc)
+saveRDS(gl1, "./Results/gl1_bdens.rds")
 
 # GLM with all covariates -------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -83,8 +83,8 @@ gl2 <- train(gf_cal, cp_cal,
 gl2
 summary(gl2)
 gl2.pred <- predict(grids, gl2) ## spatial predictions
-
 stopCluster(mc)
+saveRDS(gl2, "./Results/gl2_bdens.rds")
 
 # Random forest <randomForest> --------------------------------------------
 # start doParallel to parallelize model fitting
@@ -106,10 +106,9 @@ rf <- train(gf_cal, cp_cal,
 
 # model outputs & predictions
 print(rf) ## RMSEs accross tuning parameters
-plot(varImp(rf)) ## relative variable importance
 rf.pred <- predict(grids, rf) ## spatial predictions
-
 stopCluster(mc)
+saveRDS(rf, "./Results/rf_bdens.rds")
 
 # Generalized boosting <gbm> ----------------------------------------------
 # start doParallel to parallelize model fitting
@@ -133,10 +132,9 @@ gb <- train(gf_cal, cp_cal,
 
 # model outputs & predictions
 print(gb) ## RMSEs accross tuning parameters
-plot(varImp(gb)) ## relative variable importance
 gb.pred <- predict(grids, gb) ## spatial predictions
-
 stopCluster(mc)
+saveRDS(gb, "./Results/gb_bdens.rds")
 
 # Neural network <nnet> ---------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -158,15 +156,14 @@ nn <- train(gf_cal, cp_cal,
 
 # model outputs & predictions
 print(nn) ## RMSEs accross tuning parameters
-plot(varImp(nn)) ## relative variable importance
 nn.pred <- predict(grids, nn) ## spatial predictions
-
 stopCluster(mc)
+saveRDS(nn, "./Results/nn_bdens.rds")
 
 # Model stacking setup ----------------------------------------------------
 preds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred)
 names(preds) <- c("gl1","gl2","rf","gb","nn")
-plot(preds, axes = F)
+plot(preds, axes=F)
 
 # extract model predictions
 coordinates(gs_val) <- ~x+y
@@ -174,67 +171,36 @@ projection(gs_val) <- projection(preds)
 gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
-# stacking model validation labels and features
-cp_val <- gspred$bcount
-cp_val <- log(((gs_val$bcount)/6.25)+1)
-gf_val <- gspred[,64:68] ## subset validation features
-
 # Model stacking ----------------------------------------------------------
-# start doParallel to parallelize model fitting
-mc <- makeCluster(detectCores())
-registerDoParallel(mc)
-
-# control setup
-set.seed(1385321)
-tc <- trainControl(method = "cv", allowParallel = T)
-
-# model training
-st <- train(gf_val, cp_val,
-            method = "glm",
-            trControl = tc)
-
-# model outputs & predictions
-st
-summary(st)
-plot(varImp(st))
-st.pred <- predict(preds, st) ## spatial predictions
-plot(st.pred, axes = F)
-
-stopCluster(mc)
+# poisson model
+summary(st <- glm(bcount ~ gl1+gl2+rf+gb+nn, family=poisson, gspred))
+(est <- cbind(Estimate = coef(st), confint(st))) ## standard 95% confidence intervals
+st.pred <- predict(preds, st, type="response")
+plot(st.pred, axes=F)
 
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, st.pred)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st")
-writeRaster(gspreds, filename="./Results/TZ_bcount_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
+writeRaster(gspreds, filename="./Results/ZM_bcount_2019.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
+write.csv(gsout, "./Results/RW_bcount_out.csv", row.names = F)
 
 # Prediction plot checks
 require(devtools)
 require(quantreg)
 
 par(pty="s")
-par(mfrow=c(1,2), mar=c(5,5,1,1))
-plot(bcount/6.25~I(GBD/6.25), xlab="DigitalGlobe prediction", ylab="GeoSurvey building density", cex.lab=1.5, 
-     xlim=c(-1,41), ylim=c(-1,41), gsout)
-gbdQ <- rq(bcount/6.25~I(GBD/6.25), tau=c(0.05,0.5,0.95), data=gsout)
-print(gbdQ)
-curve(gbdQ$coefficients[2]*x+gbdQ$coefficients[1], add=T, from=0, to=41, col="blue", lwd=1)
-curve(gbdQ$coefficients[4]*x+gbdQ$coefficients[3], add=T, from=0, to=41, col="red", lwd=1)
-curve(gbdQ$coefficients[6]*x+gbdQ$coefficients[5], add=T, from=0, to=41, col="blue", lwd=1)
-abline(c(0,1), col="grey", lwd=2)
-
-plot(bcount/6.25~exp(st)-1, xlab="AfSIS ensemble prediction", ylab="GeoSurvey building density", cex.lab=1.5, 
-     xlim=c(-1,41), ylim=c(-1,41), gsout)
-stQ <- rq(bcount/6.25~I(exp(st)-1), tau=c(0.05,0.5,0.95), data=gsout)
+par(mfrow=c(1,1), mar=c(5,5,1,1))
+plot(bcount~st, xlab="Ensemble prediction", ylab="GeoSurvey building density", cex.lab=1.3, 
+     xlim=c(-1,300), ylim=c(-1,300), gsout)
+stQ <- rq(bcount~st, tau=c(0.05,0.5,0.95), data=gsout)
 print(stQ)
-curve(stQ$coefficients[2]*x+stQ$coefficients[1], add=T, from=0, to=41, col="blue", lwd=1)
-curve(stQ$coefficients[4]*x+stQ$coefficients[3], add=T, from=0, to=41, col="red", lwd=1)
-curve(stQ$coefficients[6]*x+stQ$coefficients[5], add=T, from=0, to=41, col="blue", lwd=1)
+curve(stQ$coefficients[2]*x+stQ$coefficients[1], add=T, from=0, to=300, col="blue", lwd=1)
+curve(stQ$coefficients[4]*x+stQ$coefficients[3], add=T, from=0, to=300, col="red", lwd=1)
+curve(stQ$coefficients[6]*x+stQ$coefficients[5], add=T, from=0, to=300, col="blue", lwd=1)
 abline(c(0,1), col="grey", lwd=2)
-
