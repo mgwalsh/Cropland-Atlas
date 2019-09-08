@@ -101,7 +101,7 @@ projection(geos) <- projection(grids)
 geosgrid <- extract(grids, geos)
 gsdat <- as.data.frame(cbind(geos, geosgrid)) 
 # gsdat <- gsdat[!duplicated(gsdat), ] ## removes any duplicates ... if needed
-gsdat <- gsdat[complete.cases(gsdat[ ,c(10:13,19:70)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(10:13,19:67)]),] ## removes incomplete cases
 gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens observer ID's
 
 # Write data frame --------------------------------------------------------
