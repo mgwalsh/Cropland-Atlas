@@ -30,7 +30,7 @@ gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- log(((gs_cal$bcount)/6.25)+1) ## log transform of the building count data to buildings/ha
+cp_cal <- log(gs_cal$bcount+1) ## log transform of the building count data
 
 # raster calibration features
 gf_cal <- gs_cal[,19:67]
@@ -181,14 +181,14 @@ plot(st.pred, axes=F)
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, st.pred)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st")
-writeRaster(gspreds, filename="./Results/ZM_bcount_2019.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
+writeRaster(gspreds, filename="./Results/TZ_bcount_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-write.csv(gsout, "./Results/RW_bcount_out.csv", row.names = F)
+write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
 
 # Prediction plot checks
 require(devtools)
