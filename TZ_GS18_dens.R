@@ -172,7 +172,7 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # Model stacking ----------------------------------------------------------
-# poisson model
+# Poisson model
 summary(st <- glm(bcount ~ gl1+gl2+rf+gb+nn, family=poisson, gspred))
 (est <- cbind(Estimate = coef(st), confint(st))) ## standard 95% confidence intervals
 st.pred <- predict(preds, st, type="response")
