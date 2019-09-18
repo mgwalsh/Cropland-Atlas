@@ -176,6 +176,7 @@ summary(st <- glm(bcount ~ gl1+gl2+rf+gb+nn, family=poisson, gspred))
 (est <- cbind(Estimate = coef(st), confint(st))) ## standard 95% confidence intervals
 st.pred <- predict(preds, st, type="response")
 plot(st.pred, axes=F)
+saveRDS(st, "./Results/st_bdens.rds")
 
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, st.pred)
@@ -187,7 +188,7 @@ coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-write.csv(gsout, "./Results/RW_bcount_out.csv", row.names = F)
+write.csv(gsout, "./Results/ZM_bcount_out.csv", row.names = F)
 
 # Prediction plot checks
 require(devtools)
