@@ -1,8 +1,8 @@
-# Zambia GeoSurvey 2019 250m resolution L1-GS data setup
+# Zambia GeoSurvey 2019 250m resolution L1/L2-GS data setup
 # M. Walsh, July 2019
 
 # Required packages
-# install.packages(c("downloader","rgdal","jsonlite","raster","leaflet","htmlwidgets","wordcloud")), dependencies=TRUE)
+# install.packages(c("downloader","rgdal","jsonlite","raster","leaflet","htmlwidgets","wordcloud"), dependencies=TRUE)
 suppressPackageStartupMessages({
   require(downloader)
   require(rgdal)
@@ -19,9 +19,9 @@ dir.create("ZM_GS19", showWarnings = F)
 setwd("./ZM_GS19")
 
 # download GeoSurvey data
-download("https://www.dropbox.com/s/4ws0dwrc18pb7bc/ZM_geos_L1_2019.csv.zip?raw=1", "ZM_geos_L1_2019.csv.zip", mode = "wb")
-unzip("ZM_geos_L1_2019.csv.zip", overwrite = T)
-geos <- read.table("ZM_geos_L1_2019.csv", header = T, sep = ",")
+download("https://osf.io/wnvuy?raw=1", "ZM_geos_L12_2019.csv.zip", mode = "wb")
+unzip("ZM_geos_L12_2019.csv.zip", overwrite = T)
+geos <- read.table("ZM_geos_L12_2019.csv", header = T, sep = ",")
 
 # download GADM-L2 shapefile (courtesy of: http://www.gadm.org)
 download("https://www.dropbox.com/s/3x870g2n5cjge16/ZM_GADM_L2.zip?raw=1", "ZM_GADM_L2.zip", mode = "wb")
