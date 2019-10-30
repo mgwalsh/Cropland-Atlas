@@ -71,7 +71,7 @@ bp <- cbind(bp, bcount)
 geos <- rbind(ba, bp)
 geos <- geos[order(geos$time),] ## sort in original sample order
 
-# cropland grid count
+# Cropland grid count
 cp <- geos[which(geos$CP == "Y"), ] ## identify quadrats with cropland
 cp$cgrid <- as.character(cp$cgrid)
 
