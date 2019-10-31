@@ -113,7 +113,6 @@ rf <- train(fcal, lcal,
 
 # model outputs & predictions
 print(rf) ## ROC's accross tuning parameters
-plot(varImp(rf)) ## relative variable importance
 rf.pred <- predict(grids, rf, type = "prob") ## spatial predictions
 stopCluster(mc)
 fname <- paste("./Results/", labs, "_rf.rds", sep = "")
@@ -143,7 +142,6 @@ gb <- train(fcal, lcal,
 
 # model outputs & predictions
 print(gb) ## ROC's accross tuning parameters
-plot(varImp(gb)) ## relative variable importance
 gb.pred <- predict(grids, gb, type = "prob") ## spatial predictions
 stopCluster(mc)
 fname <- paste("./Results/", labs, "_gb.rds", sep = "")
@@ -188,8 +186,8 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$BP ## change this to $CP, $WP ...
-gf_val <- gspred[,55:59] ## subset validation features
+lval <- as.vector(t(gs_val[labs]))
+fval <- gspred[,56:60] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -202,7 +200,7 @@ tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
 
 # model training
-st <- train(gf_val, cp_val,
+st <- train(fval, lval,
             method = "glm",
             family = "binomial",
             metric = "ROC",
@@ -210,15 +208,15 @@ st <- train(gf_val, cp_val,
 
 # model outputs & predictions
 print(st)
-plot(varImp(st))
 st.pred <- predict(preds, st, type = "prob") ## spatial predictions
 plot(1-st.pred, axes = F)
 stopCluster(mc)
-saveRDS(st, "./Results/st.rds")
+fname <- paste("./Results/", labs, "_st.rds", sep = "")
+saveRDS(st, fname)
 
 # Receiver-operator characteristics ---------------------------------------
-cp_pre <- predict(st, gf_val, type="prob")
-cp_val <- cbind(cp_val, cp_pre)
+cp_pre <- predict(st, fval, type="prob")
+cp_val <- cbind(lval, cp_pre)
 cpp <- subset(cp_val, cp_val=="Y", select=c(Y))
 cpa <- subset(cp_val, cp_val=="N", select=c(Y))
 cp_eval <- evaluate(p=cpp[,1], a=cpa[,1]) ## calculate ROC's on test set
