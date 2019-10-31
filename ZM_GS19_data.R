@@ -69,7 +69,7 @@ ba <- geos[which(geos$BP == "N"), ]
 ba$bcount <- 0
 bp <- cbind(bp, bcount)
 geos <- rbind(ba, bp)
-geos <- geos[order(geos$time),] ## sort in original sample order
+geos <- geos[order(geos$today),] ## sort in original sample order
 
 # Cropland grid count
 cp <- geos[which(geos$CP == "Y"), ] ## identify quadrats with cropland
@@ -86,7 +86,7 @@ ca <- geos[which(geos$CP == "N"), ]
 ca$ccount <- 0
 cp <- cbind(cp, ccount)
 geos <- rbind(ca, cp)
-geos <- geos[order(geos$time),] ## sort in original sample order
+geos <- geos[order(geos$today),] ## sort in original sample order
 
 # project GeoSurvey coords to grid CRS
 geos.proj <- as.data.frame(project(cbind(geos$lon, geos$lat), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
