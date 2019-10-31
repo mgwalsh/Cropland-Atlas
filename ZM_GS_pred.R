@@ -30,14 +30,15 @@ gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- gs_cal$BP
+labs <- c("BP") ## insert other labels (CP,WP ...) here!
+lcal <- as.vector(t(gs_cal[labs]))
 
 # raster calibration features
-gf_cal <- gs_cal[,17:55]
+fcal <- gs_cal[,17:55]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,22:31,45]
+fcpv <- gs_cal[,22:31,45]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -49,7 +50,7 @@ tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
 
 # model training
-gl1 <- train(gf_cpv, cp_cal, 
+gl1 <- train(fcpv, lcal, 
              method = "glmStepAIC",
              family = "binomial",
              preProc = c("center","scale"), 
@@ -61,7 +62,8 @@ summary(gl1)
 print(gl1) ## ROC's accross cross-validation
 gl1.pred <- predict(grids, gl1, type = "prob") ## spatial predictions
 stopCluster(mc)
-saveRDS(gl1, "./Results/gl1.rds")
+fname <- paste("./Results/", labs, "_gl1.rds", sep = "")
+saveRDS(gl1, fname)
 
 # GLM with all covariates -------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -74,7 +76,7 @@ tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
 
 # model training
-gl2 <- train(gf_cal, cp_cal, 
+gl2 <- train(fcal, lcal, 
              method = "glmStepAIC",
              family = "binomial",
              preProc = c("center","scale"), 
@@ -86,7 +88,8 @@ summary(gl2)
 print(gl2) ## ROC's accross cross-validation
 gl2.pred <- predict(grids, gl2, type = "prob") ## spatial predictions
 stopCluster(mc)
-saveRDS(gl2, "./Results/gl2.rds")
+fname <- paste("./Results/", labs, "_gl2.rds", sep = "")
+saveRDS(gl2, fname)
 
 # Random forest <randomForest> --------------------------------------------
 # start doParallel to parallelize model fitting
@@ -100,7 +103,7 @@ tc <- trainControl(method = "cv", classProbs = T,
 tg <- expand.grid(mtry = seq(1,5, by=1)) ## model tuning steps
 
 # model training
-rf <- train(gf_cal, cp_cal,
+rf <- train(fcal, lcal,
             preProc = c("center","scale"),
             method = "rf",
             ntree = 501,
@@ -113,7 +116,8 @@ print(rf) ## ROC's accross tuning parameters
 plot(varImp(rf)) ## relative variable importance
 rf.pred <- predict(grids, rf, type = "prob") ## spatial predictions
 stopCluster(mc)
-saveRDS(rf, "./Results/rf.rds")
+fname <- paste("./Results/", labs, "_rf.rds", sep = "")
+saveRDS(rf, fname)
 
 # Generalized boosting <gbm> ----------------------------------------------
 # start doParallel to parallelize model fitting
@@ -130,7 +134,7 @@ tg <- expand.grid(interaction.depth = seq(2,5, by=1), shrinkage = 0.01, n.trees 
                   n.minobsinnode = 50) ## model tuning steps
 
 # model training
-gb <- train(gf_cal, cp_cal, 
+gb <- train(fcal, lcal, 
             method = "gbm", 
             preProc = c("center", "scale"),
             trControl = tc,
@@ -142,7 +146,8 @@ print(gb) ## ROC's accross tuning parameters
 plot(varImp(gb)) ## relative variable importance
 gb.pred <- predict(grids, gb, type = "prob") ## spatial predictions
 stopCluster(mc)
-saveRDS(gb, "./Results/gb.rds")
+fname <- paste("./Results/", labs, "_gb.rds", sep = "")
+saveRDS(gb, fname)
 
 # Neural network <nnet> ---------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -156,7 +161,7 @@ tc <- trainControl(method = "cv", classProbs = T,
 tg <- expand.grid(size = seq(2,10, by=2), decay = c(0.001, 0.01, 0.1)) ## model tuning steps
 
 # model training
-nn <- train(gf_cal, cp_cal, 
+nn <- train(fcal, lcal, 
             method = "nnet",
             preProc = c("center","scale"), 
             tuneGrid = tg,
@@ -168,7 +173,8 @@ print(nn) ## ROC's accross tuning parameters
 plot(varImp(nn)) ## relative variable importance
 nn.pred <- predict(grids, nn, type = "prob") ## spatial predictions
 stopCluster(mc)
-saveRDS(nn, "./Results/nn.rds")
+fname <- paste("./Results/", labs, "_nn.rds", sep = "")
+saveRDS(nn, fname)
 
 # Model stacking setup ----------------------------------------------------
 preds <- stack(1-gl1.pred, 1-gl2.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
