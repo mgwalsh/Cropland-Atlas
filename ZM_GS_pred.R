@@ -18,7 +18,7 @@ suppressPackageStartupMessages({
 # Data setup --------------------------------------------------------------
 # Run this first: https://github.com/mgwalsh/Cropland-Atlas/blob/master/ZM_GS19_data.R
 rm(list=setdiff(ls(), c("gsdat","grids","glist"))) ## scrub extraneous objects in memory
-gsdat <- gsdat[complete.cases(gsdat[ ,c(16:54)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(15:55)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -33,11 +33,11 @@ gs_val <- gsdat[-gsIndex,]
 cp_cal <- gs_cal$BP
 
 # raster calibration features
-gf_cal <- gs_cal[,16:54]
+gf_cal <- gs_cal[,17:55]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,21:30,44]
+gf_cpv <- gs_cal[,22:31,45]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
