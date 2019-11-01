@@ -186,6 +186,7 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
+gs_val <- as.data.frame(gs_val)
 lval <- as.vector(t(gs_val[labs]))
 fval <- gspred[,56:60] ## subset validation features
 
@@ -240,9 +241,9 @@ projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 gsout$mzone <- ifelse(gsout$mk == 1, "Y", "N")
-confusionMatrix(data = gsout$mzone, reference = gsout$BP, positive = "Y")
+# confusionMatrix(data = gsout$mzone, reference = gsout$BP, positive = "Y")
 fname <- paste("./Results/","ZM_", labs, "_out.tif", sep = "")
-write.csv(gsout, fname, row.names = F) ## ... change feature names here if needed
+write.csv(gsout, fname, row.names = F)
 
 # Prediction map widget ---------------------------------------------------
 pred <- 1-st.pred ## GeoSurvey ensemble probability
@@ -253,5 +254,5 @@ w <- leaflet() %>%
   addRasterImage(pred, colors = pal, opacity = 0.4, maxBytes=6000000) %>%
   addLegend(pal = pal, values = values(pred), title = "Probability")
 w ## plot widget 
-saveWidget(w, 'ZW_BP_2019.html', selfcontained = T) ## save html ... change feature names here
+saveWidget(w, 'ZW_CP_2019.html', selfcontained = T) ## save html ... change feature names here
 
