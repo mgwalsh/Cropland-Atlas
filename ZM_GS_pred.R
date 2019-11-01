@@ -251,7 +251,7 @@ w <- leaflet() %>%
   setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 7) %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addRasterImage(pred, colors = pal, opacity = 0.4, maxBytes=6000000) %>%
-  addLegend(pal = pal, values = values(pred), title = "Building prob.")
+  addLegend(pal = pal, values = values(pred), title = "Probability")
 w ## plot widget 
 saveWidget(w, 'ZW_BP_2019.html', selfcontained = T) ## save html ... change feature names here
 
