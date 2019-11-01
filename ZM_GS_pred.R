@@ -231,7 +231,8 @@ plot(mask, axes=F)
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
-writeRaster(gspreds, filename="./Results/ZM_BP_preds_2019.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+fname <- paste("./Results/","ZM_", labs, "_preds_2019.tif", sep = "")
+writeRaster(gspreds, filename=fname, datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
@@ -240,7 +241,8 @@ gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 gsout$mzone <- ifelse(gsout$mk == 1, "Y", "N")
 confusionMatrix(data = gsout$mzone, reference = gsout$BP, positive = "Y")
-write.csv(gsout, "./Results/ZW_BP_out.csv", row.names = F) ## ... change feature names here if needed
+fname <- paste("./Results/","ZM_", labs, "_out.tif", sep = "")
+write.csv(gsout, fname, row.names = F) ## ... change feature names here if needed
 
 # Prediction map widget ---------------------------------------------------
 pred <- 1-st.pred ## GeoSurvey ensemble probability
