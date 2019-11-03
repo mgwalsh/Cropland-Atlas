@@ -2,11 +2,12 @@
 # M. Walsh, August 2019
 
 # Required packages
-# install.packages(c("devtools","caret","MASS","randomForest","gbm","nnet","plyr","doParallel")), dependencies=T)
+# install.packages(c("devtools","caret","MASS","Cubist","randomForest","gbm","nnet","plyr","doParallel")), dependencies=T)
 suppressPackageStartupMessages({
   require(devtools)
   require(caret)
   require(MASS)
+  require(Cubist)
   require(randomForest)
   require(gbm)
   require(nnet)
@@ -29,14 +30,14 @@ gs_cal <- gsdat[ gsIndex,]
 gs_val <- gsdat[-gsIndex,]
 
 # GeoSurvey calibration labels
-cp_cal <- log(gs_cal$bcount+1)
+lcal <- log(gs_cal$bcount+1)
 
 # raster calibration features
-gf_cal <- gs_cal[,16:54]
+fcal <- gs_cal[,17:55]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,21:30,44]
+fcpv <- gs_cal[,22:31,45]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -47,7 +48,7 @@ set.seed(1385321)
 tc <- trainControl(method = "cv", allowParallel = T)
 
 # model training
-gl1 <- train(gf_cpv, cp_cal, 
+gl1 <- train(fcpv, lcal, 
              method = "glmStepAIC",
              family = "gaussian",
              preProc = c("center","scale"), 
@@ -71,7 +72,7 @@ set.seed(1385321)
 tc <- trainControl(method = "cv", allowParallel = T)
 
 # model training
-gl2 <- train(gf_cal, cp_cal, 
+gl2 <- train(fcal, lcal, 
              method = "glmStepAIC",
              family = "gaussian",
              preProc = c("center","scale"), 
@@ -79,11 +80,30 @@ gl2 <- train(gf_cal, cp_cal,
              metric ="RMSE")
 
 # model outputs & predictions
-gl2
+print(gl2)
 summary(gl2)
 gl2.pred <- predict(grids, gl2) ## spatial predictions
 stopCluster(mc)
 saveRDS(gl2, "./Results/gl2_bdens.rds")
+
+# Cubist <Cubist> ---------------------------------------------------------
+# start doParallel to parallelize model fitting
+mc <- makeCluster(detectCores())
+registerDoParallel(mc)
+
+# control setup
+set.seed(seed)
+tc <- trainControl(method="repeatedcv", number=10, repeats=3, allowParallel = T)
+# tg <- needs tuning
+
+cu <- train(fcal, lcal, 
+            method = "cubist", 
+            trControl = tc)
+
+print(cu)
+stopCluster(mc)
+fname <- paste("./Results/", labs, "_cu.rds", sep = "")
+saveRDS(gl2, "./Results/cu_bdens.rds")
 
 # Random forest <randomForest> --------------------------------------------
 # start doParallel to parallelize model fitting
