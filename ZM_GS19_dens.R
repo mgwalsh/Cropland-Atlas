@@ -2,12 +2,11 @@
 # M. Walsh, August 2019
 
 # Required packages
-# install.packages(c("devtools","caret","MASS","Cubist","randomForest","gbm","nnet","plyr","doParallel")), dependencies=T)
+# install.packages(c("devtools","caret","MASS","randomForest","gbm","nnet","plyr","doParallel")), dependencies=T)
 suppressPackageStartupMessages({
   require(devtools)
   require(caret)
   require(MASS)
-  require(Cubist)
   require(randomForest)
   require(gbm)
   require(nnet)
@@ -18,7 +17,7 @@ suppressPackageStartupMessages({
 # Data setup --------------------------------------------------------------
 # Run this first: https://github.com/mgwalsh/Cropland-Atlas/blob/master/ZM_GS19_data.R
 rm(list=setdiff(ls(), c("gsdat","grids"))) ## scrubs extraneous objects in memory
-gsdat <- gsdat[complete.cases(gsdat[ ,c(14,16:54)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(15,17:55)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -86,25 +85,6 @@ gl2.pred <- predict(grids, gl2) ## spatial predictions
 stopCluster(mc)
 saveRDS(gl2, "./Results/gl2_bdens.rds")
 
-# Cubist <Cubist> ---------------------------------------------------------
-# start doParallel to parallelize model fitting
-mc <- makeCluster(detectCores())
-registerDoParallel(mc)
-
-# control setup
-set.seed(seed)
-tc <- trainControl(method="repeatedcv", number=10, repeats=3, allowParallel = T)
-# tg <- needs tuning
-
-cu <- train(fcal, lcal, 
-            method = "cubist", 
-            trControl = tc)
-
-print(cu)
-stopCluster(mc)
-fname <- paste("./Results/", labs, "_cu.rds", sep = "")
-saveRDS(gl2, "./Results/cu_bdens.rds")
-
 # Random forest <randomForest> --------------------------------------------
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -116,7 +96,7 @@ tc <- trainControl(method = "cv", allowParallel = T)
 tg <- expand.grid(mtry = seq(1,8, by=1)) ## model tuning steps
 
 # model training
-rf <- train(gf_cal, cp_cal,
+rf <- train(fcal, lcal,
             preProc = c("center","scale"),
             method = "rf",
             ntree = 501,
@@ -143,7 +123,7 @@ tg <- expand.grid(interaction.depth = seq(6,12, by=2), shrinkage = seq(0.02,0.1,
                   n.minobsinnode = 25) ## model tuning steps
 
 # model training
-gb <- train(gf_cal, cp_cal, 
+gb <- train(fcal, lcal, 
             method = "gbm", 
             preProc = c("center", "scale"),
             trControl = tc,
@@ -166,7 +146,7 @@ tc <- trainControl(method = "cv", allowParallel = T)
 tg <- expand.grid(size = seq(2,10, by=2), decay = c(0.001, 0.01, 0.1)) ## model tuning steps
 
 # model training
-nn <- train(gf_cal, cp_cal, 
+nn <- train(fcal, lcal, 
             method = "nnet",
             preProc = c("center","scale"), 
             tuneGrid = tg,
