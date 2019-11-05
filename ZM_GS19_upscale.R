@@ -16,6 +16,7 @@ suppressPackageStartupMessages({
 # set working directory
 dir.create("ZM_GS19_100m", showWarnings = F)
 setwd("./ZM_GS19_100m")
+dir.create("Results", showWarnings = F)
 
 # download GeoSurvey data
 download("https://osf.io/6srce?raw=1", "ZM_buildings.csv.zip", mode = "wb")
