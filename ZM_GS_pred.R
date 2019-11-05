@@ -18,7 +18,7 @@ suppressPackageStartupMessages({
 # Data setup --------------------------------------------------------------
 # Run this first: https://github.com/mgwalsh/Cropland-Atlas/blob/master/ZM_GS19_data.R
 rm(list=setdiff(ls(), c("gsdat","grids","glist"))) ## scrub extraneous objects in memory
-gsdat <- gsdat[complete.cases(gsdat[ ,c(15:55)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(9:11,17:55)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -168,7 +168,6 @@ nn <- train(fcal, lcal,
 
 # model outputs & predictions
 print(nn) ## ROC's accross tuning parameters
-plot(varImp(nn)) ## relative variable importance
 nn.pred <- predict(grids, nn, type = "prob") ## spatial predictions
 stopCluster(mc)
 fname <- paste("./Results/", labs, "_nn.rds", sep = "")
