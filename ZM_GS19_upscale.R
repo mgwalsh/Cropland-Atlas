@@ -81,6 +81,7 @@ stopCluster(mc)
 saveRDS(up, "./Results/up_bdens.rds")
 
 # Write files -------------------------------------------------------------
-write.csv(gsdat, "./Results/ZM_buildings_preds.csv", row.names = F)
+gsout$up <- predict(up, gsdat)
+write.csv(gsout, "./Results/ZM_building_upscale.csv", row.names = F)
 writeRaster(up.pred, filename="./Results/ZM_bcount_100m.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
