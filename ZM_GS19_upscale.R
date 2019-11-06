@@ -100,5 +100,4 @@ confusionMatrix(data = gsdat$up_pa, reference = gsdat$BP, positive = "Y")
 # Write files -------------------------------------------------------------
 write.csv(gsdat, "./Results/ZM_building_upscale.csv", row.names = F)
 gspred <- stack(up.pred, mk)
-writeRaster(gspred, filename="./Results/ZM_bcount_100m.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
-
+writeRaster(gspred, filename="./Results/ZM_bcount_100m.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
