@@ -74,7 +74,7 @@ up <- train(fcal, lcal,
             trControl = tc,
             metric ="RMSE")
 
-# model outputs & predictions
+# model predictions
 print(up)
 summary(up)
 up.pred <- (predict(grids, up))/6.25 ## spatial predictions building densities/ha
@@ -82,6 +82,7 @@ stopCluster(mc)
 saveRDS(up, "./Results/up_bdens.rds")
 
 # Receiver-operator characteristics ---------------------------------------
+gsdat$up_pred <- predict(up, gsdat)
 p <- gsdat[ which(gsdat$BP=="Y"), ]
 p <- p[,18]
 a <- gsdat[ which(gsdat$BP=="N"), ]
@@ -93,11 +94,10 @@ plot(e, 'ROC') ## plot ROC curve
 t <- threshold(e) ## calculate thresholds based on ROC
 mk <- reclassify(up.pred, c(-Inf, t[,1], 0, t[,1], Inf, 1)) ## reclassify map based on kappa
 plot(mk, axes=F)
-
-# Write files -------------------------------------------------------------
-gsdat$up_pred <- predict(up, gsdat)
 gsdat$up_pa <- ifelse(gsdat$up_pred > t[,1], "Y", "N")
 confusionMatrix(data = gsdat$up_pa, reference = gsdat$BP, positive = "Y")
+
+# Write files -------------------------------------------------------------
 write.csv(gsdat, "./Results/ZM_building_upscale.csv", row.names = F)
 gspred <- stack(up.pred, mk)
 writeRaster(gspred, filename="./Results/ZM_bcount_100m.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
