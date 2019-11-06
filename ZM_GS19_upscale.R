@@ -2,13 +2,14 @@
 # M. Walsh, November 2019
 
 # Required packages
-# install.packages(c("downloader","rgdal","raster","doParallel"), dependencies=TRUE)
+# install.packages(c("downloader","rgdal","raster","dismo","doParallel"), dependencies=TRUE)
 suppressPackageStartupMessages({
   require(downloader)
   require(rgdal)
   require(raster)
   require(MASS)
   require(caret)
+  require(dismo)
   require(doParallel)
 })
 
@@ -80,8 +81,24 @@ up.pred <- (predict(grids, up))/6.25 ## spatial predictions building densities/h
 stopCluster(mc)
 saveRDS(up, "./Results/up_bdens.rds")
 
+# Receiver-operator characteristics ---------------------------------------
+p <- gsdat[ which(gsdat$BP=="Y"), ]
+p <- p[,18]
+a <- gsdat[ which(gsdat$BP=="N"), ]
+a <- a[,18]
+e <- evaluate(p=p, a=a) ## calculate ROC
+plot(e, 'ROC') ## plot ROC curve
+
+# Generate feature mask
+t <- threshold(e) ## calculate thresholds based on ROC
+mk <- reclassify(up.pred, c(-Inf, t[,1], 0, t[,1], Inf, 1)) ## reclassify map based on kappa
+plot(mk, axes=F)
+
 # Write files -------------------------------------------------------------
-gsout$up <- predict(up, gsdat)
-write.csv(gsout, "./Results/ZM_building_upscale.csv", row.names = F)
-writeRaster(up.pred, filename="./Results/ZM_bcount_100m.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
+gsdat$up_pred <- predict(up, gsdat)
+gsdat$up_pa <- ifelse(gsdat$up_pred > t[,1], "Y", "N")
+confusionMatrix(data = gsdat$up_pa, reference = gsdat$BP, positive = "Y")
+write.csv(gsdat, "./Results/ZM_building_upscale.csv", row.names = F)
+gspred <- stack(up.pred, mk)
+writeRaster(gspred, filename="./Results/ZM_bcount_100m.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
