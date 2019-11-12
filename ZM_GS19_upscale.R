@@ -24,7 +24,7 @@ download("https://osf.io/6srce?raw=1", "ZM_buildings.csv.zip", mode = "wb")
 unzip("ZM_buildings.csv.zip", overwrite = T)
 geos <- read.table("ZM_buildings.csv", header = T, sep = ",")
 
-# download raster stack
+# download raster stack (upscaled 250m building predictions)
 download("https://osf.io/4m3x2?raw=1", "ZM_building_preds_2019.zip", mode = "wb")
 unzip("ZM_building_preds_2019.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
@@ -90,7 +90,7 @@ a <- a[,18]
 e <- evaluate(p=p, a=a) ## calculate ROC
 plot(e, 'ROC') ## plot ROC curve
 
-# Generate feature mask
+# Generate building mask
 t <- threshold(e) ## calculate thresholds based on ROC
 mk <- reclassify(up.pred, c(-Inf, t[,1], 0, t[,1], Inf, 1)) ## reclassify map based on kappa
 plot(mk, axes=F)
@@ -101,3 +101,4 @@ confusionMatrix(data = gsdat$up_pa, reference = gsdat$BP, positive = "Y")
 write.csv(gsdat, "./Results/ZM_building_upscale.csv", row.names = F)
 gspred <- stack(up.pred, mk)
 writeRaster(gspred, filename="./Results/ZM_bcount_100m.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+
