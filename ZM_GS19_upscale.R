@@ -82,13 +82,15 @@ stopCluster(mc)
 saveRDS(up, "./Results/up_bdens.rds")
 
 # Receiver-operator characteristics ---------------------------------------
-gsdat$up_pred <- predict(up, gsdat)
-p <- gsdat[ which(gsdat$BP=="Y"), ]
+gs_val$up_pred <- predict(up, gs_val) ## predictions on validation set
+p <- gs_val[ which(gs_val$BP=="Y"), ]
 p <- p[,18]
 a <- gsdat[ which(gsdat$BP=="N"), ]
 a <- a[,18]
 e <- evaluate(p=p, a=a) ## calculate ROC
 plot(e, 'ROC') ## plot ROC curve
+gs_val$up_pa <- ifelse(gs_val$up_pred > t[,1], "Y", "N")
+confusionMatrix(data = gs_val$up_pa, reference = gs_val$BP, positive = "Y")
 
 # Generate building mask
 t <- threshold(e) ## calculate thresholds based on ROC
