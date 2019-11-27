@@ -91,11 +91,18 @@ e <- evaluate(p=p, a=a) ## calculate ROC
 plot(e, 'ROC') ## plot ROC curve
 
 # Generate settlement mask
+gsdat$up_pred <- predict(up, gsdat) ## predictions on all of the data
+p <- gsdat[ which(gsdat$BP=="Y"), ]
+p <- p[,18]
+a <- gsdat[ which(gsdat$BP=="N"), ]
+a <- a[,18]
+e <- evaluate(p=p, a=a) ## calculate ROC
+plot(e, 'ROC') ## plot ROC curve
 t <- threshold(e) ## calculate thresholds based on ROC
 mk <- reclassify(up.pred, c(-Inf, t[,1], 0, t[,1], Inf, 1)) ## reclassify map based on kappa
 plot(mk, axes=F)
-gs_val$up_pa <- ifelse(gs_val$up_pred > t[,1], "Y", "N")
-confusionMatrix(data = gs_val$up_pa, reference = gs_val$BP, positive = "Y")
+gsdat$up_pa <- ifelse(gsdat$up_pred > t[,1], "Y", "N")
+confusionMatrix(data = gsdat$up_pa, reference = gsdat$BP, positive = "Y")
 
 # Write files -------------------------------------------------------------
 write.csv(gsdat, "./Results/ZM_building_upscale.csv", row.names = F)
