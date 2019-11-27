@@ -90,7 +90,7 @@ a <- a[,18]
 e <- evaluate(p=p, a=a) ## calculate ROC
 plot(e, 'ROC') ## plot ROC curve
 
-# Generate building mask
+# Generate settlement mask
 t <- threshold(e) ## calculate thresholds based on ROC
 mk <- reclassify(up.pred, c(-Inf, t[,1], 0, t[,1], Inf, 1)) ## reclassify map based on kappa
 plot(mk, axes=F)
