@@ -1,4 +1,4 @@
-# Stacked predictions of Zambia 2019 GeoSurvey building density observations
+# Stacked predictions of Zambia 2019 GeoSurvey building densities 
 # M. Walsh, August 2019
 
 # Required packages
