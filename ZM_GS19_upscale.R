@@ -77,7 +77,7 @@ up <- train(fcal, lcal,
 # model predictions
 print(up)
 summary(up)
-up.pred <- (predict(grids, up))/6.25 ## spatial predictions building densities/ha
+up.pred <- (predict(grids, up))/6.25 ## spatial predictions of building densities/ha
 stopCluster(mc)
 saveRDS(up, "./Results/up_bdens.rds")
 
@@ -91,7 +91,7 @@ e <- evaluate(p=p, a=a) ## calculate ROC
 plot(e, 'ROC') ## plot ROC curve
 
 # Generate settlement mask
-gsdat$up_pred <- predict(up, gsdat) ## predictions on all of the data
+gsdat$up_pred <- predict(up, gsdat) ## predictions on all of the GeoSurvey data
 p <- gsdat[ which(gsdat$BP=="Y"), ]
 p <- p[,18]
 a <- gsdat[ which(gsdat$BP=="N"), ]
