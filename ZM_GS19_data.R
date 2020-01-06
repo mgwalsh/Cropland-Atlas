@@ -29,7 +29,7 @@ unzip("ZM_GADM_L2.zip", overwrite = T)
 shape <- shapefile("gadm36_ZMB_2.shp")
 
 # download raster stack
-download("https://www.dropbox.com/s/0i2qf5o53kjdkcu/ZM_250m_2019.zip?raw=1", "ZM_250m_2019.zip", mode = "wb")
+download("httpshttps://osf.io/4gjtu?raw=1", "ZM_250m_2019.zip", mode = "wb")
 unzip("ZM_250m_2019.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
