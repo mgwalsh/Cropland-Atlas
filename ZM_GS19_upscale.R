@@ -80,6 +80,7 @@ summary(up)
 up.pred <- (predict(grids, up))/6.25 ## spatial predictions of building densities/ha
 stopCluster(mc)
 saveRDS(up, "./Results/up_bdens.rds")
+plot(up.pred, axes=F)
 
 # Receiver-operator characteristics ---------------------------------------
 gs_val$up_pred <- predict(up, gs_val) ## predictions on validation set
