@@ -23,10 +23,10 @@ download("https://osf.io/2evzk?raw=1", "MZ_geos_L1_2019.csv.zip", mode = "wb")
 unzip("MZ_geos_L1_2019.csv.zip", overwrite = T)
 geos <- read.table("MZ_geos_L1_2019.csv", header = T, sep = ",")
 
-# download GADM-L3 shapefile (courtesy of: http://www.gadm.org)
+# download Mozambique GADM-L3 shapefile (courtesy of: http://www.gadm.org)
 download("https://osf.io/yw4vr?raw=1", "MZ_GADM_L3.zip", mode = "wb")
 unzip("MZ_GADM_L3.zip", overwrite = T)
-shape <- shapefile("gadm36_ZMB_2.shp")
+shape <- shapefile("gadm36_MOZ_3.shp")
 
 # download raster stack
 download("https://osf.io/dp6ez$raw=1", "MZ_250m_2019.zip", mode = "wb")
@@ -35,13 +35,13 @@ glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 
 # Data setup --------------------------------------------------------------
-# attach GADM-L2 admin unit names from shape
+# attach GADM-L3 admin unit names from shape
 coordinates(geos) <- ~lon+lat
 projection(geos) <- projection(shape)
 gadm <- geos %over% shape
 geos <- as.data.frame(geos)
-geos <- cbind(gadm[ ,c(4,7)], geos)
-colnames(geos) <- c("province","district","survey","today","observer","id","lat","lon","BP","CP","WP","TP","bloc","cgrid")
+geos <- cbind(gadm[ ,c(4,7,10)], geos)
+colnames(geos) <- c("province","district","locality","today","observer","id","lat","lon","BP","CP","WP","TP","bloc","cgrid")
 
 # Coordinates and number of buildings per quadrat -------------------------
 bp <- geos[which(geos$BP == "Y"), ] ## identify quadrats with buildings
@@ -102,8 +102,8 @@ gsdat$ccount[is.na(gsdat$ccount)] <- 1
 
 # Write data frame --------------------------------------------------------
 dir.create("Results", showWarnings = F)
-write.csv(bcoord, "./Results/ZM_bcoord.csv", row.names = F)
-write.csv(gsdat, "./Results/ZM_gsdat_2019.csv", row.names = F)
+write.csv(bcoord, "./Results/MZ_bcoord.csv", row.names = F)
+write.csv(gsdat, "./Results/MZ_gsdat_2019.csv", row.names = F)
 
 # GeoSurvey map widgets ---------------------------------------------------
 # number of GeoSurvey quadrats
