@@ -112,7 +112,7 @@ w <- leaflet() %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addCircleMarkers(gsdat$lon, gsdat$lat, clusterOptions = markerClusterOptions())
 w ## plot widget 
-saveWidget(w, 'ZM_GS19.html', selfcontained = T) ## save widget
+saveWidget(w, 'MZ_GS19.html', selfcontained = T) ## save widget
 
 # number of building tags
 b <- leaflet() %>%
@@ -120,7 +120,7 @@ b <- leaflet() %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addCircleMarkers(bcoord$lon, bcoord$lat, clusterOptions = markerClusterOptions())
 b ## plot widget 
-saveWidget(b, 'ZM_GS19_buildings.html', selfcontained = T) ## save widget
+saveWidget(b, 'MZ_GS19_buildings.html', selfcontained = T) ## save widget
 
 # GeoSurvey contributions -------------------------------------------------
 gscon <- as.data.frame(table(gsdat$observer))
