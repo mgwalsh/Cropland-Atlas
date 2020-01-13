@@ -1,5 +1,5 @@
 # Mozambique GeoSurvey 2019 250m resolution Level-1 data setup
-# M. Walsh, Jan 2020
+# M. Walsh, January 2020
 
 # Required packages
 # install.packages(c("downloader","rgdal","jsonlite","raster","leaflet","htmlwidgets","wordcloud"), dependencies=TRUE)
