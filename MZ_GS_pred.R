@@ -241,7 +241,7 @@ gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 gsout$mzone <- ifelse(gsout$mk == 1, "Y", "N")
 # confusionMatrix(data = gsout$mzone, reference = gsout$BP, positive = "Y")
-fname <- paste("./Results/","MZ_", labs, "_out.tif", sep = "")
+fname <- paste("./Results/","MZ_", labs, "_out.csv", sep = "")
 write.csv(gsout, fname, row.names = F)
 
 # Prediction map widget ---------------------------------------------------
