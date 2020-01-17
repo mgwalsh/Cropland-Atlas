@@ -55,7 +55,7 @@ gs_val <- gsdat[-gsIndex,]
 lcal <- gs_cal$bcount
 
 # prediction features
-fcal <- gs_cal[,10:15]
+fcal <- gs_cal[,7:12]
 
 # Upscaling model ---------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -85,18 +85,18 @@ plot(up.pred, axes=F)
 # Receiver-operator characteristics ---------------------------------------
 gs_val$up_pred <- predict(up, gs_val) ## predictions on validation set
 p <- gs_val[ which(gs_val$BP=="Y"), ]
-p <- p[,18]
+p <- p[,15]
 a <- gs_val[ which(gs_val$BP=="N"), ]
-a <- a[,18]
+a <- a[,15]
 e <- evaluate(p=p, a=a) ## calculate ROC
 plot(e, 'ROC') ## plot ROC curve
 
 # Generate settlement mask
 gsdat$up_pred <- predict(up, gsdat) ## predictions on all of the GeoSurvey data
 p <- gsdat[ which(gsdat$BP=="Y"), ]
-p <- p[,18]
+p <- p[,15]
 a <- gsdat[ which(gsdat$BP=="N"), ]
-a <- a[,18]
+a <- a[,15]
 e <- evaluate(p=p, a=a) ## calculate ROC
 plot(e, 'ROC') ## plot ROC curve
 t <- threshold(e) ## calculate thresholds based on ROC
@@ -108,5 +108,5 @@ confusionMatrix(data = gsdat$up_pa, reference = gsdat$BP, positive = "Y")
 # Write files -------------------------------------------------------------
 write.csv(gsdat, "./Results/ZM_building_upscale.csv", row.names = F)
 gspred <- stack(up.pred, mk)
-writeRaster(gspred, filename="./Results/ZM_bcount_100m.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspred, filename="./Results/MZ_bcount_100m.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
