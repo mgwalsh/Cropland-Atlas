@@ -1,4 +1,4 @@
-# Tanzania GeoSurvey 2018 L2-GS upscale to 100m resolution
+# Tanzania GeoSurvey 2018 L2 upscale to 100m resolution
 # M. Walsh, January 2019
 
 # Required packages
@@ -106,6 +106,6 @@ gsdat$up_pa <- ifelse(gsdat$up_pred > t[,1], "Y", "N")
 confusionMatrix(data = gsdat$up_pa, reference = gsdat$BP, positive = "Y")
 
 # Write files -------------------------------------------------------------
-write.csv(gsdat, "./Results/MZ_building_upscale.csv", row.names = F)
+write.csv(gsdat, "./Results/TZ_building_upscale.csv", row.names = F)
 gspred <- stack(up.pred, mk)
-writeRaster(gspred, filename="./Results/MZ_bcount_100m.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspred, filename="./Results/TZ_bcount_100m.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
