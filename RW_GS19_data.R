@@ -17,6 +17,7 @@ suppressPackageStartupMessages({
 # set working directory
 dir.create("RW_GS19", showWarnings = F)
 setwd("./RW_GS19")
+dir.create("Results", showWarnings = F)
 
 # download GeoSurvey data
 download("https://www.dropbox.com/s/oqao51hxxvc09ec/RW_geos_2019.csv.zip?raw=1", "RW_geos_2019.csv.zip", mode = "wb")
@@ -101,7 +102,6 @@ gsdat <- as.data.frame(cbind(geos, geosgrid))
 gsdat <- gsdat[ which(gsdat$ccount < 17), ]
 
 # Write data frame --------------------------------------------------------
-dir.create("Results", showWarnings = F)
 write.csv(bcoord, "./Results/RW_bcoord.csv", row.names = F)
 write.csv(gsdat, "./Results/RW_gsdat_2019.csv", row.names = F)
 
