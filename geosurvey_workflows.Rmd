@@ -4,26 +4,26 @@
 
 ## Introduction
 
-Quantifying the geographical extent, location and spatial dynamics of cropland areas, rural and urban settlements and woody vegetation cover provides essential land cover information for monitoring and managing human dominated landscapes and their socio-economic, health, environmental and ecological impacts. Large portions of Africa remain largely *"terra incognita"* in this context. This is the main motivation and thematic context for the prediction workflows that are presented here. 
+Quantifying the geographical extent, location and spatial dynamics of cropland areas, rural and urban settlements and woody vegetation cover provides essential land cover information for monitoring and managing human dominated (*"anthropic"*) landscapes and their socio-economic, health, environmental and ecological impacts. Large portions of Africa remain largely *"terra incognita"* in this context. This is the main motivation and thematic context for the prediction workflows that are presented here. 
 
-[**GeoSurvey**](https://geosurvey.qed.ai/) is a platform for analyzing geospatial land cover observations. High resolution satellite images, mobile phone photography, and drone imagery can be examined and sytematically queried by either trained photo interpreters and/or *"crowds"* of citizen scientists. When done with care, these observations can result in large, well-structured, properly labeled, geospatial datasets that are suitable for machine learning and geostatistical predictions of land cover and in some instances for inferring land use. The detailed manual for conducting your own GeoSurveys is available at: [**GeoSurvey manual**](https://docs.google.com/document/d/1y-HYUSYpDVESPdmEcl3I2kuL0bwrT41wMiq0zE9uzOs/edit).
+[**GeoSurvey**](https://geosurvey.qed.ai/) is a platform for analyzing geospatial land cover observations. High resolution satellite images, mobile phone photography, and drone imagery can be examined and sytematically documented by either trained photo interpreters and/or *"crowds"* of citizen scientists. When done with care, these observations result in large, well-structured, properly labeled, geospatial datasets that are suitable for machine learning and geostatistical predictions of land cover and in some instances for inferring land use. The detailed manual for conducting your own GeoSurveys is available at: [**GeoSurvey manual**](https://docs.google.com/document/d/1y-HYUSYpDVESPdmEcl3I2kuL0bwrT41wMiq0zE9uzOs/edit).
 
-This chapter provides an overview of some of proposed ensemble machine learning and statistical workflows, which we have used for mapping and interpreting GeoSurvey land cover observations from Digital Globe (Worlview etc) satellite images. We recognize that there are potentially many different techniques and algorithms that could be applied in this context. Hence, the workflows presented here are completely open for discussion and improvement. They could (and probably should) also be exposed and stress-tested in data science competitions e.g., at [**Kaggle**](https://www.kaggle.com/), given their current potential importance for managing *terra incognita* landscapes. 
+This chapter provides an overview of some of proposed ensemble machine learning and statistical workflows, which we have used for mapping and interpreting GeoSurvey land cover observations from Digital Globe (Worlview etc) satellite images. We recognize that there are potentially many different techniques and algorithms that could be applied in this context. Hence, the workflows presented here are completely open for discussion and improvement. They could (and probably should) also be exposed and stress-tested in data science competitions e.g., at [**Kaggle**](https://www.kaggle.com/), given their current importance for managing *terra incognita* landscapes. 
 
-The main intent is to provide some starter code for predictive mapping and statistical small area estimation (SAE) of variables such as cropland area, building densities, settlement occurrences and woody vegetation cover that largely define *"anthropically dominated"* land cover types in either a given country or in any other large geographical region of interest. We use the most recent GeoSurvey data and gridded covariates from Tanzania to illustrate the three main analysis steps. These include sequentially:  
+The main intent is to provide some starter code for predictive mapping and statistical small area estimation (SAE) of variables such as cropland area, building densities, settlement occurrences and woody vegetation cover that largely define *anthropic* land cover types in either a given country or in any other large geographical region of interest. We use the most recent GeoSurvey data and gridded covariates from Tanzania to illustrate the main analysis steps. These include sequentially:  
 
 1. Data wrangling
 2. Spatial prediction using ensemble machine learning
 3. Small area estimation
 4. Spatial monitoring and prediction
 
-In order to monitor changing landscapes these steps should be repeated over time; i.e., to facilitate step 4. The end of this chapter gives some suggestions on as to how to do just that, though we cannot provide a fully-worked example of GeoSurvey-based space-time prediction at this point in time. 
+In order to monitor changing landscapes the first three steps should be repeated over time; i.e., to facilitate step 4. The end of this chapter gives some suggestions on as to how to do just that, though we cannot generate a fully-worked example of space-time land cover predictions at this point in time. 
 
 ## Step 1: Data wrangling
 
 Assembling analysis-ready dataframes is typically a major task that can take an inordinate amount of a data scientist's time and effort both inside and outside of the actual prediction workflows (e.g., for covariate image and GIS pre-processing). Data providers are encouraged to provide *"clean"* datasets. While GeoSurvey does the *"clean bits"* pretty much automatically, in some instances the veracity of the observations, particularly from crowd-sourced data collections, should be thoroughly quality checked by GeoSurvey administrators. There is an example script for doing that at: [**Data quality check**]()
 
-We will demonstrate the use the following R packages to assemble a coherent dataframe for Tanzania, as an example for the overall workflow:
+We will use the following R packages to assemble a coherent dataframe for Tanzania, as an example for an overall workflow:
 
 ```{r}
 suppressPackageStartupMessages({
@@ -37,11 +37,11 @@ suppressPackageStartupMessages({
 })
 ```
 
-### Load the data to your computer
+### Load the data locally
 
-There are already many examples of GeoSurveys of different countries and other regions of interest that are available. For Africa, exemplar *"tidied-up"* data are made publicly available on the [**Open Science Framework**](https://osf.io/vxc97/) repository, which also mirrors all of the associated data wrangling and prediction R-code at [**Github**](https://github.com/mgwalsh/Cropland-Atlas).
+There are already many examples of GeoSurveys of different countries and other regions of interest that are available. For Africa, exemplar, *"tidied-up"* data are made publicly available on the [**Open Science Framework**](https://osf.io/vxc97/) repository, which also mirrors all of the associated data assembly and prediction R-code at [**Github**](https://github.com/mgwalsh/Cropland-Atlas).
 
-This chunk loads all of the relevant data for Tanzania from the [OSF repo]() & Dropbox:
+The following chunk loads all of the relevant data for Tanzania from the [**OSF repo**](https://osf.io/j8y3z/) & Dropbox:
 
 ```{r}
 # set working directory
@@ -61,25 +61,33 @@ unzip("TZA_adm3.zip", overwrite = T)
 shape <- shapefile("TZA_adm3.shp")
 
 # download raster stack (note this is a big 1+ Gb download, which a take a while to download depending ...)
-download("https://www.dropbox.com/s/ejl3h62hojnhh3a/TZ_250m_2019.zip?raw=1", "TZ_250m_2019.zip", mode = "wb")
+# do this only periodically because of the download time involved
+# download("https://www.dropbox.com/s/ejl3h62hojnhh3a/TZ_250m_2019.zip?raw=1", "TZ_250m_2019.zip", mode = "wb")
 unzip("TZ_250m_2019.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 ```
 
-### Spatial covariates
+### Spatial covariates (grids)
 
-People have asked what are all the covariates that are used in the various predictions? While these keep changing as we get new open access to data and they are often long-term averages which are being updated as warranted. For Tanzania they currently include:
+People have frequently asked what are all the covariates that are used in the various predictions? While these keep changing as we get access to new open data and they are often long-term averages which are being updated as warranted. For Tanzania the spatial covariates currently include:
 
-1. Climate related covariates:
-  - temperature maps,
-  - precipitation maps,
+1. Climate related variables:
+    - temperature maps,
+    - precipitation maps,
 2. Terrain data
-3.
+    - elevation
+    - various terrain derrivatives including slope
+3. Central place theory based variables
+  -
+4. Remote sensing data
+  - long-term average Terra & Aqua MODIS data
+  - annual Sentinel 1 & data
+5. Previous predictions of soil and land cover models
   
 ### Assemble the data
 
-This chunk assembles the data. It includes total building counts and cropland proportion estimates based on a grid count (both per 6.25 ha quadrat) and subsequently combines everything with the gridded variables in a consistent dataframe that can be used for spatial prediction. It also ID's and credits all of the GeoSurveyors who were involved in the data collection.
+The chunk below assembles the data. It includes total building counts and cropland proportion estimates based on a grid count (both per 6.25 ha quadrat) and subsequently combines everything with the gridded variables in a consistent dataframe that can be used for spatial prediction. It also ID's and credits all of the GeoSurveyors who were involved in the data collection.
 
 ```{r}
 # attach GADM-L3 admin unit names from shape
@@ -146,9 +154,10 @@ gsdat <- as.data.frame(cbind(geos, geosgrid))
 # gsdat <- gsdat[!duplicated(gsdat), ] ## removes any duplicates ... if needed
 gsdat <- gsdat[complete.cases(gsdat[ ,c(10:13,19:67)]),] ## removes incomplete cases
 gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens observer ID's
+str(gsdat) ## data listing
 ```
 
-The following chunk writes and documents files that are that will be used subsequently for various spatial predictions. It also produces simple Leaflet maps of sampling locations and building coordinates and attributes GeoSurveyor contributions as a wordcloud.
+The following chunk writes files that are subsequently used subsequently for various spatial predictions. It also produces simple Leaflet maps of sampling locations and building coordinates and attributes and signs GeoSurveyor contributions as a wordcloud.
 
 ```{r}
 dir.create("Results", showWarnings = F)
@@ -168,3 +177,6 @@ gscon <- as.data.frame(table(gsdat$observer))
 set.seed(1235813)
 wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(4,0.1), random.order = T)
 ```
+
+## Step 2: Spatial prediction using ensemble machine learning
+
