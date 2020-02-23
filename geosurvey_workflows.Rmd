@@ -9,7 +9,7 @@ Grateful acknowledgement to the team at [**QED**](https://qed.ai/), who built an
 
 Quantifying the geographical extent, location and spatial dynamics of cropland areas, rural and urban settlements and woody vegetation cover provides essential land cover information for monitoring and managing human dominated (*"anthropic"*) landscapes and their socio-economic, health, environmental and ecological impacts. Large portions of Africa remain *"terra incognita"* in this context. This is the main motivation and thematic context for the completely reproducible prediction workflow that is presented here. 
 
-[**GeoSurvey**](https://geosurvey.qed.ai/) is a platform for analyzing geospatial land cover observations. High resolution satellite images, mobile phone photography, and drone imagery can be examined and sytematically documented by either trained photo interpreters and/or by *"crowds"* of citizen scientists. When done with care, these observations result in large, well-structured, properly labeled, geospatial datasets that are suitable for machine learning and geostatistical predictions of land cover and in some instances for inferring land use. The detailed manual for conducting your own GeoSurveys is available at: [**GeoSurvey manual**](https://docs.google.com/document/d/1y-HYUSYpDVESPdmEcl3I2kuL0bwrT41wMiq0zE9uzOs/edit). The manual should definitely be consulted to obtain information about how GeoSurvey is or can be carried out physically/practically. We shall not cover that in this chapter and start from the perspective that we already have GeoSurvey data in hand.
+[**GeoSurvey**](https://geosurvey.qed.ai/) is a platform for analyzing geospatial land cover observations. High resolution satellite images, mobile phone photography, and drone imagery can be examined and sytematically labeled by either trained photo interpreters and/or by *"crowds"* of citizen scientists. When done with care, these observations result in large, well-structured, properly labeled, geospatial datasets that are suitable for machine learning and geostatistical predictions of land cover and in some instances for inferring land use. The detailed manual for conducting your own GeoSurveys is available at: [**GeoSurvey manual**](https://docs.google.com/document/d/1y-HYUSYpDVESPdmEcl3I2kuL0bwrT41wMiq0zE9uzOs/edit). The manual should definitely be consulted to obtain information about how GeoSurvey is or can be carried out physically/practically. We shall not cover that in this chapter and start from the perspective that we already have GeoSurvey data in hand.
 
 This chapter provides an overview of some of proposed ensemble machine learning and statistical workflows, which we have used for mapping and interpreting GeoSurvey land cover observations from Digital Globe (Worlview etc) satellite images. We recognize that there are potentially many different techniques and algorithms that could be applied in this context. Hence, the workflows presented here are completely open for criticism and improvement. They could (and probably should) also be exposed and stress-tested in data science competitions e.g., at [**Kaggle**](https://www.kaggle.com/), given their current importance for managing terra incognita landscapes. 
 
@@ -214,10 +214,9 @@ w <- leaflet() %>%
 saveWidget(w, 'TZ_GS18.html', selfcontained = T) ## save widget
 w ## plot widget 
 ```
+**Figure 1**: Distribution of GeoSurvey locations completed in Tanzania (2018).
 
-Distribution of GeoSurvey locations in Tanzania (2018).
-
-GeoSurvey contributions are acknowledged with a simple wordcloud, which highlights the proportion of the quadrats that were completed by each GeoSurveyor. This essentially provides the survey signature for quality control purposes.
+Individual GeoSurvey contributions are acknowledged with a simple wordcloud, which highlights the proportion of the quadrats that were completed by each GeoSurveyor. This essentially provides the survey signature for quality control purposes.
 
 ```{r}
 # GeoSurvey contributions -------------------------------------------------
@@ -225,6 +224,7 @@ gscon <- as.data.frame(table(gsdat$observer))
 set.seed(1235813)
 wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(4,0.1), random.order = T)
 ```
+**Figure 2**: Tanzania GeoSurvey contributions (2018).
 
 
 ## Step 2: Spatial prediction using ensemble machine learning {#geosurvey_step2}
