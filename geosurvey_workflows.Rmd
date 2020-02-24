@@ -216,9 +216,8 @@ w <- leaflet() %>%
 saveWidget(w, 'TZ_GS18.html', selfcontained = T) ## save widget
 w ## plot widget 
 ```
-**Figure 1**: Distribution of GeoSurvey locations completed in Tanzania (2018).
 
-Individual GeoSurvey contributions are acknowledged with a simple wordcloud, which highlights the proportion of the quadrats that were completed by each GeoSurveyor. This also essentially provides the survey signature for quality control purposes.
+Individual GeoSurvey contributions are acknowledged via a simple wordcloud, which highlights the proportion of the quadrats that were completed by each GeoSurveyor. This also essentially provides the survey signature for quality control purposes.
 
 ```{r}
 # GeoSurvey contributions -------------------------------------------------
@@ -230,7 +229,7 @@ wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(4,0.1), random.order = T)
 
 ## Step 2: Spatial prediction using ensemble machine learning {#geosurvey_step2}
 
-We now turn to the prediction part of the workflow. We acknowledge that everyone appears to have their favorite algorithm(s) for predicting the types geospatial data that GeoSurvey produces. The notion of there being favorite algorithms supports our philosophy that we might be able use some sort of a combination of those (favorites) to derive a weighted (*"ensemble"*) prediction at the end of the process. Our basic schema for this is shown in the Figure below:
+We now turn to the prediction part of the workflow. We acknowledge that many data scientists appear to have their favorite algorithm(s) for predicting the types geospatial data that GeoSurvey produces. Alsomany new algorithms are being developed. The notion of there being favorite algorithms supports our philosophy that we might be able use some sort of a combination of those (favorites) to derive a weighted (*"ensemble"*) prediction at the end of the process. Our basic schema for this is shown in the Figure below:
 
 ```{r geosurvey_prediction_wokflow, echo=FALSE, fig.cap="Generalized GeoSurvey ensemble prediction workflow", out.width="100%", out.extra="angle=0"}
 knitr::include_graphics("figures/geosurvey_prediction_wokflow.png")
