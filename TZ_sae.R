@@ -17,7 +17,7 @@ suppressPackageStartupMessages({
 dir.create("TZ_sae", showWarnings = F)
 setwd("./TZ_sae")
 
-# Data dow!nloads -----------------------------------------------------------
+# Data downloads -----------------------------------------------------------
 # download GeoSurvey data
 download("https://osf.io/27avb?raw=1", "TZ_gsdat_2018.csv.zip", mode = "wb")
 unzip("TZ_gsdat_2018.csv.zip", overwrite = T)
@@ -50,7 +50,6 @@ write.csv(saedat, "./Results/TZ_sae.csv", row.names = F)
 
 # Cropland area models ----------------------------------------------------
 # binomial models of GeoSurvey cropland grid counts
-# cp <-  saedat[which(saedat$CP=='Y'), ] ## actual cropland observations only
 summary(m0 <- glm(cbind(ccount, 16-ccount) ~ 1, family=binomial, saedat)) ## mean model
 (est0 <- cbind(Estimate = coef(m0), confint(m0))) ## standard 95% confidence intervals
 # summary(mq <- glm(cbind(ccount, 16-ccount) ~ 1, family=quasibinomial(link="logit"), gsdat)) ## overdispersed model
@@ -68,7 +67,7 @@ summary(m2 <- glm(cbind(ccount, 16-ccount) ~ BP18*CP18*WP18, family=binomial, sa
 anova(m1, m2) ## model comparison
 m2.pred <- predict(grids, m2, type="response")
 plot(m2.pred, axes=F)
-# gsdat$m2 <- predict(m2, gsdat, type="response")
+# saedat$m2 <- predict(m2, saedat, type="response")
 
 # Write prediction grids
 gspreds <- stack(m1.pred, m2.pred)
@@ -77,17 +76,17 @@ writeRaster(gspreds, filename="./Results/TZ_cp_sae.tif", datatype="FLT4S", optio
 
 # Small area estimates (SAE)
 # post-stratified by admin units
-summary(m3 <- glmer(cbind(ccount, 16-ccount) ~ 1 + (1|district), family=binomial, saedat))
+summary(m3 <- glmer(cbind(ccount, 16-ccount) ~ 1 + (1|region), family=binomial, saedat))
 
 #  with additional LCC covariates
-summary(m4 <- glmer(cbind(ccount, 16-ccount) ~ BP19*CP19*WP19 + (1|district), family=binomial, saedat))
+summary(m4 <- glmer(cbind(ccount, 16-ccount) ~ BP18*CP18*WP18 + (1|region), family=binomial, saedat))
 ran <- ranef(m4) ## extract regional random effects
 ses <- se.coef(m4) ## extract regional standard errors
-nam <- rownames(ran$district)
-sae <- as.data.frame(cbind(ran$district, ses$district)) ## regional-level small area estimates
+nam <- rownames(ran$region)
+sae <- as.data.frame(cbind(ran$region, ses$region)) ## regional-level small area estimates
 colnames(sae) <- c("ran","se")
-par(pty="s", mar=c(10,10,1,1))
-coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-0.5,0.5), CI=2, main="") ## district coefficient plot
+# par(pty="s", mar=c(10,10,1,1))
+coefplot(ran$region[,1], ses$region[,1], varnames=nam, xlim=c(-1,1), CI=2, main="") ## region coefficient plot
 write.csv(sae, "./Results/TZ_crop_area_sae.csv", row.names = F)
 
 # Building count models ---------------------------------------------------
