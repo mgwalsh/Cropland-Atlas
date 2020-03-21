@@ -100,7 +100,6 @@ anova(m5, mnb)
 summary(m6 <- glm(bcount ~ BP18, family=poisson, saedat)) ## scaling model
 (est6 <- cbind(Estimate = coef(m6), confint(m6))) ## standard 95% confidence intervals
 m6.pred <- predict(grids, m6, type="response")
-dev.off()
 plot(m6.pred, axes=F)
 # gsdat$m6 <- predict(m6, gsdat, type="response")
 
@@ -109,7 +108,7 @@ summary(m7 <- glm(bcount ~ BP18*CP18*WP18, family=poisson, saedat))
 (est7 <- cbind(Estimate = coef(m7), confint(m7))) ## standard 95% confidence intervals
 m7.pred <- predict(grids, m7, type="response")
 plot(m7.pred, axes=F)
-saedat$m7 <- predict(m7, gsdat, type="response")
+# saedat$m7 <- predict(m7, saedat, type="response")
 
 # Write prediction grids
 gspreds <- stack(m6.pred, m7.pred)
@@ -117,25 +116,23 @@ names(gspreds) <- c("m6","m7")
 writeRaster(gspreds, filename="./Results/TZ_bcount_sae.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Small area estimates (SAE)
-# post-stratified by admin units (72 districts)
-summary(m8 <- glmer(bcount ~ 1 + (1|district), family=poisson, saedat))
+# post-stratified by admin units (30 regions)
+summary(m8 <- glmer(bcount ~ 1 + (1|region), family=poisson, saedat))
 ran <- ranef(m8) ## extract district random effects
 ses <- se.coef(m8) ## extract district standard errors
-nam <- rownames(ran$district)
-sae <- as.data.frame(cbind(ran$district, ses$district)) ## district-level small area estimates
+nam <- rownames(ran$region)
+sae <- as.data.frame(cbind(ran$region, ses$region)) ## region-level small area estimates
 colnames(sae) <- c("ran","se")
-par(pty="s", mar=c(10,10,1,1))
-coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-2,2), CI=2, main="") ## district coefficient plot
+coefplot(ran$region[,1], ses$region[,1], varnames=nam, xlim=c(-2,2), CI=2, main="") ## region coefficient plot
 
 # with additional LCC covariates
-summary(m9 <- glmer(bcount ~ BP18*CP18*WP18 + (1|district), family=poisson, saedat))
+summary(m9 <- glmer(bcount ~ BP18*CP18*WP18 + (1|region), family=poisson, saedat))
 anova(m8, m9) ## model comparison
-ran <- ranef(m9) ## extract district random effects
-ses <- se.coef(m9) ## extract district standard errors
-nam <- rownames(ran$district)
-sae <- as.data.frame(cbind(ran$district, ses$district)) ## district-level small area estimates
+ran <- ranef(m9) ## extract region random effects
+ses <- se.coef(m9) ## extract region standard errors
+nam <- rownames(ran$region)
+sae <- as.data.frame(cbind(ran$region, ses$region)) ## region-level small area estimates
 colnames(sae) <- c("ran","se")
-par(pty="s", mar=c(10,10,1,1))
-coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-1,1), CI=2, main="") ## district coefficient plot
+coefplot(ran$region[,1], ses$region[,1], varnames=nam, xlim=c(-1,1), CI=2, main="") ## region coefficient plot
 write.csv(sae, "./Results/TZ_bcount_sae.csv", row.names = F)
 
