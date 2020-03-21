@@ -79,7 +79,7 @@ writeRaster(gspreds, filename="./Results/TZ_cp_sae.tif", datatype="FLT4S", optio
 # post-stratified by admin units
 summary(m3 <- glmer(cbind(ccount, 16-ccount) ~ 1 + (1|district), family=binomial, saedat))
 
-# +additional LCC covariates
+#  with additional LCC covariates
 summary(m4 <- glmer(cbind(ccount, 16-ccount) ~ BP19*CP19*WP19 + (1|district), family=binomial, saedat))
 ran <- ranef(m4) ## extract regional random effects
 ses <- se.coef(m4) ## extract regional standard errors
@@ -92,35 +92,34 @@ write.csv(sae, "./Results/TZ_crop_area_sae.csv", row.names = F)
 
 # Building count models ---------------------------------------------------
 # Poisson models of GeoSurvey building counts
-# bp <-  gsdat[which(gsdat$BP=='Y'), ] ## actual settlement observations only
-summary(m5 <- glm(bcount ~ 1, family=poisson, gsdat)) ## country mean model
+summary(m5 <- glm(bcount ~ 1, family=poisson, saedat)) ## country mean model
 (est5 <- cbind(Estimate = coef(m5), confint(m5))) ## standard 95% confidence intervals
-summary(mnb <- glm.nb(bcount ~ 1, gsdat)) ## overdispersed negative binomial model
+summary(mnb <- glm.nb(bcount ~ 1, saedat)) ## overdispersed negative binomial model
 anova(m5, mnb)
 
-# with building presence prediction (BM19, building mask)
-summary(m6 <- glm(bcount ~ BM19, family=poisson, gsdat)) ## scaling model
+# with building presence prediction (BP18, building probability)
+summary(m6 <- glm(bcount ~ BP18, family=poisson, saedat)) ## scaling model
 (est6 <- cbind(Estimate = coef(m6), confint(m6))) ## standard 95% confidence intervals
 m6.pred <- predict(grids, m6, type="response")
 dev.off()
 plot(m6.pred, axes=F)
 # gsdat$m6 <- predict(m6, gsdat, type="response")
 
-# +additional LCC covariates
-summary(m7 <- glm(bcount ~ BP19*CP19*WP19, family=poisson, gsdat))
+# with additional LCC covariates
+summary(m7 <- glm(bcount ~ BP18*CP18*WP18, family=poisson, saedat))
 (est7 <- cbind(Estimate = coef(m7), confint(m7))) ## standard 95% confidence intervals
 m7.pred <- predict(grids, m7, type="response")
 plot(m7.pred, axes=F)
-gsdat$m7 <- predict(m7, gsdat, type="response")
+saedat$m7 <- predict(m7, gsdat, type="response")
 
 # Write prediction grids
 gspreds <- stack(m6.pred, m7.pred)
 names(gspreds) <- c("m6","m7")
-writeRaster(gspreds, filename="./Results/ZM_bcount_sae.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
+writeRaster(gspreds, filename="./Results/TZ_bcount_sae.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Small area estimates (SAE)
 # post-stratified by admin units (72 districts)
-summary(m8 <- glmer(bcount ~ 1 + (1|district), family=poisson, gsdat))
+summary(m8 <- glmer(bcount ~ 1 + (1|district), family=poisson, saedat))
 ran <- ranef(m8) ## extract district random effects
 ses <- se.coef(m8) ## extract district standard errors
 nam <- rownames(ran$district)
@@ -129,8 +128,8 @@ colnames(sae) <- c("ran","se")
 par(pty="s", mar=c(10,10,1,1))
 coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-2,2), CI=2, main="") ## district coefficient plot
 
-# +additional LCC covariates
-summary(m9 <- glmer(bcount ~ BP19*CP19*WP19 + (1|district), family=poisson, gsdat))
+# with additional LCC covariates
+summary(m9 <- glmer(bcount ~ BP18*CP18*WP18 + (1|district), family=poisson, saedat))
 anova(m8, m9) ## model comparison
 ran <- ranef(m9) ## extract district random effects
 ses <- se.coef(m9) ## extract district standard errors
@@ -139,15 +138,5 @@ sae <- as.data.frame(cbind(ran$district, ses$district)) ## district-level small 
 colnames(sae) <- c("ran","se")
 par(pty="s", mar=c(10,10,1,1))
 coefplot(ran$district[,1], ses$district[,1], varnames=nam, xlim=c(-1,1), CI=2, main="") ## district coefficient plot
-write.csv(sae, "./Results/ZM_bcount_sae.csv", row.names = F)
+write.csv(sae, "./Results/TZ_bcount_sae.csv", row.names = F)
 
-# Building density map widget
-pred <- m7.pred/6.25 ## GeoSurvey building densities (per ha)
-pal <- colorBin("Reds", domain = 0:maxValue(pred), na.color = "light grey") ## set color palette
-w <- leaflet() %>% 
-  setView(lng = mean(gsdat$lon), lat = mean(gsdat$lat), zoom = 7) %>%
-  addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
-  addRasterImage(pred, colors = pal, opacity = 0.6, maxBytes=6000000) %>%
-  addLegend(pal = pal, values = values(pred), title = "Building density")
-w ## plot widget 
-saveWidget(w, 'ZM_bcount_sae.html', selfcontained = T)
