@@ -22,7 +22,7 @@ setwd("./TZ_sae")
 download("https://osf.io/27avb?raw=1", "TZ_gsdat_2018.csv.zip", mode = "wb")
 unzip("TZ_gsdat_2018.csv.zip", overwrite = T)
 geos <- read.table("TZ_gsdat_2018.csv", header = T, sep = ",")
-vars <- c("region","district","ward","lat","lon","BP","CP","bcount","ccount","PH")
+vars <- c("region","district","ward","lat","lon","BP","CP","WP","bcount","ccount","PH")
 geos <- geos[vars] ## removes extraneous variables
 geos <- geos[ which(geos$ccount < 17), ] ## drops cropland miscounts
 
