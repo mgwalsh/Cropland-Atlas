@@ -1,4 +1,4 @@
-# Tanzania GeoSurvey 2018 250m resolution GS data setup
+# Tanzania GeoSurvey 2018 250m resolution GS-L2 data setup
 # M. Walsh, April 2018
 
 # Required packages
@@ -20,10 +20,9 @@ setwd("./TZ_GS18")
 
 # download GeoSurvey data
 # see sampling frame @ https://github.com/mgwalsh/Sampling/blob/master/TZ_GS_sample.R
-download("https://www.dropbox.com/s/0x4y4j6ifqidmhh/TZ_geos_2018.csv.zip?raw=1", "TZ_geos_2018.csv.zip", mode = "wb")
+download("https://osf.io/9gndf/?raw=1", "TZ_geos_2018.csv.zip", mode = "wb")
 unzip("TZ_geos_2018.csv.zip", overwrite = T)
 geos <- read.table("TZ_geos_2018.csv", header = T, sep = ",")
-geos$BIC <- as.factor(ifelse(geos$CP == "Y" & geos$BP == "Y", "Y", "N")) ## identifies croplands with buildings
 
 # download GADM-L3 shapefile (courtesy: http://www.gadm.org)
 download("https://www.dropbox.com/s/bhefsc8u120uqwp/TZA_adm3.zip?raw=1", "TZA_adm3.zip", mode = "wb")
@@ -31,8 +30,8 @@ unzip("TZA_adm3.zip", overwrite = T)
 shape <- shapefile("TZA_adm3.shp")
 
 # download raster stack (note this is a big 1+ Gb download)
-download("https://www.dropbox.com/s/ejl3h62hojnhh3a/TZ_250m_2019.zip?raw=1", "TZ_250m_2019.zip", mode = "wb")
-unzip("TZ_250m_2019.zip", overwrite = T)
+download("https://osf.io/fdkz8?raw=1", "TZ_GS_preds.zip", mode = "wb")
+unzip("TZ_GS_preds.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 
