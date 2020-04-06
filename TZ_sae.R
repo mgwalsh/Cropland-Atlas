@@ -25,6 +25,8 @@ geos <- read.table("TZ_gsdat_2018.csv", header = T, sep = ",")
 vars <- c("region","district","ward","lat","lon","BP","CP","WP","bcount","ccount","PH")
 geos <- geos[vars] ## removes extraneous variables
 geos <- geos[ which(geos$ccount < 17), ] ## drops cropland miscounts
+geos$pH56 <- as.factor(ifelse(geos$PH < 5.65, "Y", "N"))
+geos$pH65 <- as.factor(ifelse(geos$PH < 6.50, "Y", "N"))
 
 # download GeoSurvey prediction rasters
 download("https://osf.io/fdkz8?raw=1", "TZ_GS_preds.zip", mode = "wb")
@@ -85,7 +87,7 @@ ses <- se.coef(m4) ## extract regional standard errors
 nam <- rownames(ran$region)
 sae <- as.data.frame(cbind(ran$region, ses$region)) ## regional-level small area estimates
 colnames(sae) <- c("ran","se")
-# par(pty="s", mar=c(10,10,1,1))
+par(mar=c(10,10,1,1))
 coefplot(ran$region[,1], ses$region[,1], varnames=nam, xlim=c(-1,1), CI=2, main="") ## region coefficient plot
 write.csv(sae, "./Results/TZ_crop_area_sae.csv", row.names = F)
 
@@ -100,6 +102,7 @@ anova(m5, mnb)
 summary(m6 <- glm(bcount ~ BP18, family=poisson, saedat)) ## scaling model
 (est6 <- cbind(Estimate = coef(m6), confint(m6))) ## standard 95% confidence intervals
 m6.pred <- predict(grids, m6, type="response")
+dev.off()
 plot(m6.pred, axes=F)
 # gsdat$m6 <- predict(m6, gsdat, type="response")
 
@@ -123,6 +126,7 @@ ses <- se.coef(m8) ## extract district standard errors
 nam <- rownames(ran$region)
 sae <- as.data.frame(cbind(ran$region, ses$region)) ## region-level small area estimates
 colnames(sae) <- c("ran","se")
+par(mar=c(10,10,1,1))
 coefplot(ran$region[,1], ses$region[,1], varnames=nam, xlim=c(-2,2), CI=2, main="") ## region coefficient plot
 
 # with additional LCC covariates
