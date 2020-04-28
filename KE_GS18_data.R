@@ -22,7 +22,7 @@ download("https://osf.io/rx3ge?raw=1", "KE_geos_2018.csv.zip", mode = "wb")
 unzip("KE_geos_2018.csv.zip", overwrite = T)
 geos <- read.table("KE_geos_2018.csv", header = T, sep = ",")
 
-# download raster stack (note this is a big 1+ Gb download)
+# download raster stack
 download("https://osf.io/b2xnr?raw=1", "KE_250m_2018.zip", mode = "wb")
 unzip("KE_250m_2018.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
@@ -40,8 +40,8 @@ projection(geos) <- projection(grids)
 geosgrid <- extract(grids, geos)
 gsdat <- as.data.frame(cbind(geos, geosgrid)) 
 # gsdat <- gsdat[!duplicated(gsdat), ] ## removes any duplicates ... if needed
-gsdat <- gsdat[complete.cases(gsdat[ ,c(1:56)]),] ## removes incomplete cases
-gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens observer ID's
+gsdat <- gsdat[complete.cases(gsdat[ ,c(1:47)]),] ## removes incomplete cases
 
 # Write data frame --------------------------------------------------------
-write.csv(gsdat, "./Results/KE_gsdat_2018.csv", row.names = F)
+dir.create("results", showWarnings = F)
+write.csv(gsdat, "./results/KE_gsdat_2018.csv", row.names = F)
