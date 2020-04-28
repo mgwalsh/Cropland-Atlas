@@ -32,11 +32,11 @@ labs <- c("CP") ## insert other labels (BP,WP ...) here!
 lcal <- as.vector(t(gs_cal[labs]))
 
 # raster calibration features
-fcal <- gs_cal[,8:56]
+fcal <- gs_cal[,9:45]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,15:26]
+gf_cpv <- gs_cal[,14:22]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -60,7 +60,7 @@ summary(gl1)
 print(gl1) ## ROC's accross cross-validation
 gl1.pred <- predict(grids, gl1, type = "prob") ## spatial predictions
 stopCluster(mc)
-fname <- paste("./Results/", labs, "_gl1.rds", sep = "")
+fname <- paste("./results/", labs, "_gl1.rds", sep = "")
 saveRDS(gl1, fname)
 
 # GLM with all covariates -------------------------------------------------
@@ -86,7 +86,7 @@ summary(gl2)
 print(gl2) ## ROC's accross cross-validation
 gl2.pred <- predict(grids, gl2, type = "prob") ## spatial predictions
 stopCluster(mc)
-fname <- paste("./Results/", labs, "_gl2.rds", sep = "")
+fname <- paste("./results/", labs, "_gl2.rds", sep = "")
 saveRDS(gl2, fname)
 
 # Random forest <randomForest> --------------------------------------------
@@ -113,7 +113,7 @@ rf <- train(fcal, lcal,
 print(rf) ## ROC's accross tuning parameters
 rf.pred <- predict(grids, rf, type = "prob") ## spatial predictions
 stopCluster(mc)
-fname <- paste("./Results/", labs, "_rf.rds", sep = "")
+fname <- paste("./results/", labs, "_rf.rds", sep = "")
 saveRDS(rf, fname)
 
 # Generalized boosting <gbm> ----------------------------------------------
@@ -142,7 +142,7 @@ gb <- train(fcal, lcal,
 print(gb) ## ROC's accross tuning parameters
 gb.pred <- predict(grids, gb, type = "prob") ## spatial predictions
 stopCluster(mc)
-fname <- paste("./Results/", labs, "_gb.rds", sep = "")
+fname <- paste("./results/", labs, "_gb.rds", sep = "")
 saveRDS(gb, fname)
 
 # Neural network <nnet> ---------------------------------------------------
@@ -168,7 +168,7 @@ nn <- train(fcal, lcal,
 print(nn) ## ROC's accross tuning parameters
 nn.pred <- predict(grids, nn, type = "prob") ## spatial predictions
 stopCluster(mc)
-fname <- paste("./Results/", labs, "_nn.rds", sep = "")
+fname <- paste("./results/", labs, "_nn.rds", sep = "")
 saveRDS(nn, fname)
 
 # Model stacking setup ----------------------------------------------------
@@ -183,24 +183,8 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$CP ## change this to $BP, $WP ...
-gf_val <- gspred[,71:75] ## subset validation features
-
-# Model stacking setup ----------------------------------------------------
-preds <- stack(1-gl1.pred, 1-gl2.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
-names(preds) <- c("gl1","gl2","rf","gb","nn")
-plot(preds, axes = F)
-
-# extract model predictions
-coordinates(gs_val) <- ~x+y
-projection(gs_val) <- projection(preds)
-gspred <- extract(preds, gs_val)
-gspred <- as.data.frame(cbind(gs_val, gspred))
-
-# stacking model validation labels and features
-gs_val <- as.data.frame(gs_val)
-lval <- as.vector(t(gs_val[labs]))
-fval <- gspred[,57:61] ## subset validation features
+lval <- gspred$CP ## change this to $BP, $WP ...
+fval <- gspred[,46:50] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -225,7 +209,7 @@ print(st)
 st.pred <- predict(preds, st, type = "prob") ## spatial predictions
 plot(1-st.pred, axes = F)
 stopCluster(mc)
-fname <- paste("./Results/", labs, "_st.rds", sep = "")
+fname <- paste("./results/", labs, "_st.rds", sep = "")
 saveRDS(st, fname)
 
 # Receiver-operator characteristics ---------------------------------------
@@ -245,7 +229,7 @@ plot(mask, axes=F)
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
-fname <- paste("./Results/","TZ_", labs, "_preds_2019.tif", sep = "")
+fname <- paste("./results/","KE_", labs, "_preds_2018.tif", sep = "")
 writeRaster(gspreds, filename=fname, datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
@@ -255,6 +239,6 @@ gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 gsout$mzone <- ifelse(gsout$mk == 1, "Y", "N")
 confusionMatrix(data = gsout$mzone, reference = gsout$CP, positive = "Y")
-fname <- paste("./Results/","TZ_", labs, "_out.csv", sep = "")
+fname <- paste("./results/","KE_", labs, "_out.csv", sep = "")
 write.csv(gsout, fname, row.names = F)
 
