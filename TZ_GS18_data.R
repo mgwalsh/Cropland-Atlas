@@ -1,5 +1,6 @@
 # Tanzania GeoSurvey 2018 250m resolution GS-L2 data setup
-# M. Walsh, April 2018
+# version 2, w. updated grid data
+# M. Walsh, May 2019
 
 # Required packages
 # install.packages(c("downloader","rgdal","jsonlite","raster","leaflet","htmlwidgets","wordcloud")), dependencies=TRUE)
