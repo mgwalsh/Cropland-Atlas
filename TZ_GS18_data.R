@@ -30,8 +30,8 @@ unzip("TZA_adm3.zip", overwrite = T)
 shape <- shapefile("TZA_adm3.shp")
 
 # download raster stack (note this is a big 1+ Gb download)
-download("https://osf.io/fdkz8?raw=1", "TZ_GS_preds.zip", mode = "wb")
-unzip("TZ_GS_preds.zip", overwrite = T)
+download("https://osf.io/ke5ya?raw=1", "TZ_250m_2019.zip", mode = "wb")
+unzip("TZ_250m_2019.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 
@@ -42,7 +42,7 @@ projection(geos) <- projection(shape)
 gadm <- geos %over% shape
 geos <- as.data.frame(geos)
 geos <- cbind(gadm[ ,c(5,7,9)], geos)
-colnames(geos) <- c("region","district","ward","survey","time","id","observer","lat","lon","BP","CP","WP","rice","bloc","cgrid","BIC")
+colnames(geos) <- c("region","district","ward","survey","time","id","observer","lat","lon","BP","CP","WP","rice","bloc","cgrid")
 
 # Coordinates and number of buildings per quadrat -------------------------
 bp <- geos[which(geos$BP == "Y"), ] ## identify quadrats with buildings
@@ -100,7 +100,7 @@ projection(geos) <- projection(grids)
 geosgrid <- extract(grids, geos)
 gsdat <- as.data.frame(cbind(geos, geosgrid)) 
 # gsdat <- gsdat[!duplicated(gsdat), ] ## removes any duplicates ... if needed
-gsdat <- gsdat[complete.cases(gsdat[ ,c(10:13,19:67)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(18:66)]),] ## removes incomplete cases
 gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens observer ID's
 
 # Write data frame --------------------------------------------------------
