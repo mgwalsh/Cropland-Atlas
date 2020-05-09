@@ -2,7 +2,7 @@
 # M. Walsh, January 2019
 
 # Required packages
-# install.packages(c("devtools","caret","MASS","randomForest","gbm","nnet","plyr","doParallel")), dependencies=T)
+# install.packages(c("devtools","caret","MASS","randomForest","gbm","nnet","Cubist","plyr","doParallel")), dependencies=T)
 suppressPackageStartupMessages({
   require(devtools)
   require(caret)
@@ -10,6 +10,7 @@ suppressPackageStartupMessages({
   require(randomForest)
   require(gbm)
   require(nnet)
+  require(Cubist)
   require(plyr)
   require(doParallel)
 })
@@ -33,11 +34,11 @@ gs_val <- gsdat[-gsIndex,]
 cp_cal <- log(gs_cal$bcount+1) ## log transform of the building count data
 
 # raster calibration features
-gf_cal <- gs_cal[,19:67]
+gf_cal <- gs_cal[,18:66]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,26:37]
+gf_cpv <- gs_cal[,25:36]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -160,12 +161,34 @@ nn.pred <- predict(grids, nn) ## spatial predictions
 stopCluster(mc)
 saveRDS(nn, "./Results/nn_bdens.rds")
 
+# Regression tree <Cubist> ------------------------------------------------
+# start doParallel to parallelize model fitting
+mc <- makeCluster(detectCores())
+registerDoParallel(mc)
+
+# control setup
+set.seed(1385321)
+tc <- trainControl(method = "cv", allowParallel = T)
+
+# model training
+cu <- train(gf_cal, cp_cal, 
+            method = "cubist",
+            preProc = c("center","scale"), 
+            trControl = tc,
+            metric ="RMSE")
+
+# model outputs & predictions
+print(cu) ## RMSEs at default tuning parameters
+cu.pred <- predict(grids, cu) ## spatial predictions
+stopCluster(mc)
+saveRDS(cu, "./Results/cu_bdens.rds")
+
 # Model stacking setup ----------------------------------------------------
-preds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred)
-names(preds) <- c("gl1","gl2","rf","gb","nn")
+preds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, cu.pred)
+names(preds) <- c("gl1","gl2","rf","gb","nn","cu")
 plot(preds, axes=F)
 
-# extract model predictions
+# extract model predictions on validation set
 coordinates(gs_val) <- ~x+y
 projection(gs_val) <- projection(preds)
 gspred <- extract(preds, gs_val)
@@ -173,15 +196,15 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # Model stacking ----------------------------------------------------------
 # Poisson model
-summary(st <- glm(bcount ~ gl1+gl2+rf+gb+nn, family=poisson, gspred))
+summary(st <- glm(bcount ~ gl1+gl2+rf+gb+nn+cu, family=poisson, gspred))
 (est <- cbind(Estimate = coef(st), confint(st))) ## standard 95% confidence intervals
 st.pred <- predict(preds, st, type="response")
 plot(st.pred, axes=F)
 
 # Write prediction grids --------------------------------------------------
-gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, st.pred)
-names(gspreds) <- c("gl1","gl2","rf","gb","nn","st")
-writeRaster(gspreds, filename="./Results/TZ_bcount_2018.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
+gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, cu.pred, st.pred)
+names(gspreds) <- c("gl1","gl2","rf","gb","nn","cu","st")
+writeRaster(gspreds, filename="./Results/TZ_bcount_2019.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
