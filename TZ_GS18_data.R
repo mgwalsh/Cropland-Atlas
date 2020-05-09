@@ -101,7 +101,7 @@ projection(geos) <- projection(grids)
 geosgrid <- extract(grids, geos)
 gsdat <- as.data.frame(cbind(geos, geosgrid)) 
 # gsdat <- gsdat[!duplicated(gsdat), ] ## removes any duplicates ... if needed
-gsdat <- gsdat[complete.cases(gsdat[ ,c(18:66)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(18:67)]),] ## removes incomplete cases
 gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens observer ID's
 
 # Write data frame --------------------------------------------------------
@@ -120,5 +120,5 @@ saveWidget(w, 'TZ_GS18.html', selfcontained = T) ## save widget
 # GeoSurvey contributions -------------------------------------------------
 gscon <- as.data.frame(table(gsdat$observer))
 set.seed(1235813)
-wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(4,0.1), random.order = T)
+wordcloud(gscon$Var1, freq = gscon$Freq, scale = c(3,0.1), random.order = T)
 
