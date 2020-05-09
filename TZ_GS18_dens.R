@@ -34,11 +34,11 @@ gs_val <- gsdat[-gsIndex,]
 cp_cal <- log(gs_cal$bcount+1) ## log transform of the building count data
 
 # raster calibration features
-gf_cal <- gs_cal[,18:66]
+gf_cal <- gs_cal[,18:67]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,25:36]
+gf_cpv <- gs_cal[,25:37]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -161,7 +161,7 @@ nn.pred <- predict(grids, nn) ## spatial predictions
 stopCluster(mc)
 saveRDS(nn, "./Results/nn_bdens.rds")
 
-# Committee tree <Cubist> -------------------------------------------------
+# Committee trees <Cubist> ------------------------------------------------
 # start doParallel to parallelize model fitting
 # mc <- makeCluster(detectCores())
 # registerDoParallel(mc)
@@ -202,6 +202,7 @@ st.pred <- predict(preds, st, type="response")
 plot(st.pred, axes=F)
 
 # Write prediction grids --------------------------------------------------
+# for post processing and styling in GIS etc
 gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, st.pred)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st")
 writeRaster(gspreds, filename="./Results/TZ_bcount_2019.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
