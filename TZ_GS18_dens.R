@@ -161,7 +161,7 @@ nn.pred <- predict(grids, nn) ## spatial predictions
 stopCluster(mc)
 saveRDS(nn, "./Results/nn_bdens.rds")
 
-# Regression tree <Cubist> ------------------------------------------------
+# Committee tree <Cubist> -----------------------------------------------
 # start doParallel to parallelize model fitting
 # mc <- makeCluster(detectCores())
 # registerDoParallel(mc)
