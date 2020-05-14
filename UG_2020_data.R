@@ -40,8 +40,8 @@ coordinates(geos) <- ~lon+lat
 projection(geos) <- projection(shape)
 gadm <- geos %over% shape
 geos <- as.data.frame(geos)
-geos <- cbind(gadm[ ,c(4,7)], geos)
-colnames(geos) <- c("province","district","survey","today","observer","id","lat","lon","BP","CP","WP","TP","bloc","cgrid")
+geos <- cbind(gadm[ ,c(4,6,8,10)], geos)
+colnames(geos) <- c("district","county","subcounty","parish","today","observer","id","lat","lon","BP","CP","WP","CS","bloc","cgrid")
 
 # Coordinates and number of buildings per quadrat -------------------------
 bp <- geos[which(geos$BP == "Y"), ] ## identify quadrats with buildings
@@ -102,8 +102,8 @@ gsdat$ccount[is.na(gsdat$ccount)] <- 1
 
 # Write data frame --------------------------------------------------------
 dir.create("Results", showWarnings = F)
-write.csv(bcoord, "./Results/ZM_bcoord.csv", row.names = F)
-write.csv(gsdat, "./Results/ZM_gsdat_2019.csv", row.names = F)
+write.csv(bcoord, "./Results/UG_bcoord.csv", row.names = F)
+write.csv(gsdat, "./Results/UG_gsdat_2020.csv", row.names = F)
 
 # GeoSurvey map widgets ---------------------------------------------------
 # number of GeoSurvey quadrats
@@ -112,7 +112,7 @@ w <- leaflet() %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addCircleMarkers(gsdat$lon, gsdat$lat, clusterOptions = markerClusterOptions())
 w ## plot widget 
-saveWidget(w, 'ZM_GS19.html', selfcontained = T) ## save widget
+saveWidget(w, 'UG_GS20.html', selfcontained = T) ## save widget
 
 # number of building tags
 b <- leaflet() %>%
@@ -120,7 +120,7 @@ b <- leaflet() %>%
   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
   addCircleMarkers(bcoord$lon, bcoord$lat, clusterOptions = markerClusterOptions())
 b ## plot widget 
-saveWidget(b, 'ZM_GS19_buildings.html', selfcontained = T) ## save widget
+saveWidget(b, 'UG_GS20_buildings.html', selfcontained = T) ## save widget
 
 # GeoSurvey contributions -------------------------------------------------
 gscon <- as.data.frame(table(gsdat$observer))
