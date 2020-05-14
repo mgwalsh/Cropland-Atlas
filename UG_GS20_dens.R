@@ -19,6 +19,7 @@ suppressPackageStartupMessages({
 # SourceURL <- "https://raw.githubusercontent.com/mgwalsh/blob/master/UG_2020_data.R"
 # source_url(SourceURL)
 rm(list=setdiff(ls(), c("gsdat","grids"))) ## scrubs extraneous objects in memory
+gsdat <- gsdat[complete.cases(gsdat[ ,c(18:60)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
