@@ -163,29 +163,29 @@ saveRDS(nn, "./Results/nn_bdens.rds")
 
 # Committee trees <Cubist> ------------------------------------------------
 # start doParallel to parallelize model fitting
-# mc <- makeCluster(detectCores())
-# registerDoParallel(mc)
+mc <- makeCluster(detectCores())
+registerDoParallel(mc)
 
 # control setup
-# set.seed(1385321)
-# tc <- trainControl(method = "cv", allowParallel = T)
+set.seed(1385321)
+tc <- trainControl(method = "cv", allowParallel = T)
 
 # model training
-# cu <- train(gf_cal, cp_cal, 
-#             method = "cubist",
-#             preProc = c("center","scale"), 
-#             trControl = tc,
-#             metric ="RMSE")
+cu <- train(gf_cal, cp_cal, 
+            method = "cubist",
+            preProc = c("center","scale"), 
+            trControl = tc,
+            metric ="RMSE")
 
 # model outputs & predictions
-# print(cu) ## RMSEs at default tuning parameters
-# cu.pred <- predict(grids, cu) ## spatial predictions
-# stopCluster(mc)
-# saveRDS(cu, "./Results/cu_bdens.rds")
+print(cu) ## RMSEs at default tuning parameters
+cu.pred <- predict(grids, cu) ## spatial predictions
+stopCluster(mc)
+saveRDS(cu, "./Results/cu_bdens.rds")
 
 # Model stacking setup ----------------------------------------------------
-preds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred)
-names(preds) <- c("gl1","gl2","rf","gb","nn")
+preds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, cu.pred)
+names(preds) <- c("gl1","gl2","rf","gb","nn","cu")
 plot(preds, axes=F)
 
 # extract model predictions on validation set
@@ -196,15 +196,15 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # Model stacking ----------------------------------------------------------
 # Poisson model
-summary(st <- glm(bcount ~ gl1+gl2+rf+gb+nn, family=poisson, gspred))
+summary(st <- glm(bcount ~ gl1+gl2+rf+gb+nn+cu, family=poisson, gspred))
 (est <- cbind(Estimate = coef(st), confint(st))) ## standard 95% confidence intervals
 st.pred <- predict(preds, st, type="response")
 plot(st.pred, axes=F)
 
 # Write prediction grids --------------------------------------------------
 # for post processing and styling in GIS etc
-gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, st.pred)
-names(gspreds) <- c("gl1","gl2","rf","gb","nn","st")
+gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, cu.pred, st.pred)
+names(gspreds) <- c("gl1","gl2","rf","gb","nn","cu","st")
 writeRaster(gspreds, filename="./Results/UG_bcount_2020.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
