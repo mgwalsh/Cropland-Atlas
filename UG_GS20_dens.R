@@ -205,7 +205,7 @@ plot(st.pred, axes=F)
 # for post processing and styling in GIS etc
 gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, cu.pred, st.pred)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","cu","st")
-writeRaster(gspreds, filename="./Results/UG_bcount_2020.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
+writeRaster(gspreds, filename="./Results/UG_bcount_2020.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
