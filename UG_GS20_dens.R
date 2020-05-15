@@ -214,10 +214,11 @@ gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 write.csv(gsout, "./Results/UG_bcount_out.csv", row.names = F)
 
-# Prediction checks / receiver-operator characteristics
+# Prediction checks / receiver-operator characteristics -------------------
 require(devtools)
 require(quantreg)
 
+# Quantile regression (plot)
 par(pty="s")
 par(mfrow=c(1,1), mar=c(5,5,1,1))
 plot(bcount~st, xlab="Ensemble prediction", ylab="GeoSurvey building density", cex.lab=1.3, 
