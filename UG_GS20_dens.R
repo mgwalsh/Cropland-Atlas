@@ -34,11 +34,11 @@ gs_val <- gsdat[-gsIndex,]
 cp_cal <- log(gs_cal$bcount+1) ## log transform of the building count data
 
 # raster calibration features
-gf_cal <- gs_cal[,18:67]
+gf_cal <- gs_cal[,18:60]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,25:37]
+gf_cpv <- gs_cal[,23:36]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -205,14 +205,14 @@ plot(st.pred, axes=F)
 # for post processing and styling in GIS etc
 gspreds <- stack(gl1.pred, gl2.pred, rf.pred, gb.pred, nn.pred, st.pred)
 names(gspreds) <- c("gl1","gl2","rf","gb","nn","st")
-writeRaster(gspreds, filename="./Results/TZ_bcount_2019.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
+writeRaster(gspreds, filename="./Results/UG_bcount_2020.tif", datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)## ... change feature names here
 
 # Write output data frame -------------------------------------------------
 coordinates(gsdat) <- ~x+y
 projection(gsdat) <- projection(grids)
 gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
-write.csv(gsout, "./Results/TZ_bcount_out.csv", row.names = F)
+write.csv(gsout, "./Results/UG_bcount_out.csv", row.names = F)
 
 # Prediction plot checks
 require(devtools)
