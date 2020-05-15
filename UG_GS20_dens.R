@@ -215,7 +215,6 @@ gsout <- as.data.frame(cbind(gsdat, gspre))
 write.csv(gsout, "./Results/UG_bcount_out.csv", row.names = F)
 
 # Prediction checks / receiver-operator characteristics -------------------
-require(devtools)
 require(quantreg)
 
 # Quantile regression (plot)
