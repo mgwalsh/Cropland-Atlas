@@ -17,7 +17,7 @@ suppressPackageStartupMessages({
 
 # Data setup --------------------------------------------------------------
 rm(list=setdiff(ls(), c("gsdat","grids","glist"))) ## scrub extraneous objects in memory
-gsdat <- gsdat[complete.cases(gsdat[ ,c(18:60)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(12,18:60)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -241,6 +241,6 @@ gspre <- extract(gspreds, gsdat)
 gsout <- as.data.frame(cbind(gsdat, gspre))
 gsout$mzone <- ifelse(gsout$mk == 1, "Y", "N")
 confusionMatrix(data = gsout$mzone, reference = gsout$CP, positive = "Y")
-fname <- paste("./Results/","TZ_", labs, "_out.csv", sep = "")
+fname <- paste("./Results/","UG_", labs, "_out.csv", sep = "")
 write.csv(gsout, fname, row.names = F)
 
