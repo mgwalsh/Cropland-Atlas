@@ -34,11 +34,11 @@ gs_val <- gsdat[-gsIndex,]
 cp_cal <- log(gs_cal$bcount+1) ## log transform of the building count data
 
 # raster calibration features
-gf_cal <- gs_cal[,18:67]
+gf_cal <- gs_cal[,18:69]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,25:37]
+gf_cpv <- gs_cal[,25:39]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
