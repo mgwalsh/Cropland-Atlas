@@ -17,7 +17,7 @@ suppressPackageStartupMessages({
 
 # Data setup --------------------------------------------------------------
 rm(list=setdiff(ls(), c("gsdat","grids","glist"))) ## scrub extraneous objects in memory
-gsdat <- gsdat[complete.cases(gsdat[ ,c(10:12,18:63)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(10:12,18:65)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -33,11 +33,11 @@ labs <- c("CP") ## insert other labels (BP,WP ...) here!
 lcal <- as.vector(t(gs_cal[labs]))
 
 # raster calibration features
-fcal <- gs_cal[,18:63]
+fcal <- gs_cal[,18:65]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,23:39]
+gf_cpv <- gs_cal[,24:40]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -186,7 +186,7 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 # stacking model validation labels and features
 gs_val <- as.data.frame(gs_val)
 lval <- as.vector(t(gs_val[labs]))
-fval <- gspred[,64:68] ## subset validation features
+fval <- gspred[,66:70] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
