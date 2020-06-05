@@ -1,5 +1,5 @@
 # Tanzania combined GeoSurvey 2017/2018 250m resolution GS data setup
-# M. Walsh, March 2019
+# M. Walsh, March 2019 (updated grids to 2019 version)
 
 # Required packages
 # install.packages(c("downloader","rgdal","raster","leaflet","htmlwidgets","wordcloud")), dependencies=TRUE)
@@ -40,9 +40,10 @@ projection(geos) <- projection(grids)
 geosgrid <- extract(grids, geos)
 gsdat <- as.data.frame(cbind(geos, geosgrid)) 
 # gsdat <- gsdat[!duplicated(gsdat), ] ## removes any duplicates ... if needed
-gsdat <- gsdat[complete.cases(gsdat[ ,c(1:56)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(1:58)]),] ## removes incomplete cases
 gsdat$observer <- sub("@.*", "", as.character(gsdat$observer)) ## shortens observer ID's
 
 # Write data frame --------------------------------------------------------
+dir.create("Results", showWarnings = F)
 write.csv(gsdat, "./Results/TZ_gsdat_1718.csv", row.names = F)
 
