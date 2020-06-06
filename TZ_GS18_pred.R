@@ -32,11 +32,11 @@ labs <- c("CP") ## insert other labels (BP,WP ...) here!
 lcal <- as.vector(t(gs_cal[labs]))
 
 # raster calibration features
-fcal <- gs_cal[,8:56]
+fcal <- gs_cal[,8:58]
 
 # Central place theory model <glm> -----------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,15:26]
+gf_cpv <- gs_cal[,14:28]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -183,24 +183,9 @@ gspred <- extract(preds, gs_val)
 gspred <- as.data.frame(cbind(gs_val, gspred))
 
 # stacking model validation labels and features
-cp_val <- gspred$CP ## change this to $BP, $WP ...
-gf_val <- gspred[,71:75] ## subset validation features
-
-# Model stacking setup ----------------------------------------------------
-preds <- stack(1-gl1.pred, 1-gl2.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
-names(preds) <- c("gl1","gl2","rf","gb","nn")
-plot(preds, axes = F)
-
-# extract model predictions
-coordinates(gs_val) <- ~x+y
-projection(gs_val) <- projection(preds)
-gspred <- extract(preds, gs_val)
-gspred <- as.data.frame(cbind(gs_val, gspred))
-
-# stacking model validation labels and features
 gs_val <- as.data.frame(gs_val)
 lval <- as.vector(t(gs_val[labs]))
-fval <- gspred[,57:61] ## subset validation features
+fval <- gspred[,59:63] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
