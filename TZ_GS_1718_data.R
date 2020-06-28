@@ -1,4 +1,4 @@
-# Tanzania combined GeoSurvey 2017/2018 250m resolution GS data setup
+# Tanzania combined GeoSurvey 2017/2018 250m resolution data setup
 # M. Walsh, March 2019 (updated grids to 2019 version)
 
 # Required packages
