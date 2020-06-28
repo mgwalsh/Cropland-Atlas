@@ -2,7 +2,6 @@
 # M. Walsh, March 2019 (updated grids to 2019 version)
 
 # Required packages
-# install.packages(c("downloader","rgdal","raster","leaflet","htmlwidgets","wordcloud")), dependencies=TRUE)
 suppressPackageStartupMessages({
   require(downloader)
   require(rgdal)
@@ -13,10 +12,6 @@ suppressPackageStartupMessages({
 })
 
 # Data downloads -----------------------------------------------------------
-# set working directory
-dir.create("TZ_1718", showWarnings = F)
-setwd("./TZ_1718")
-
 # download GeoSurvey data
 download("https://osf.io/uhx9b?raw=1", "TZ_geos_1718.csv.zip", mode = "wb")
 unzip("TZ_geos_1718.csv.zip", overwrite = T)
