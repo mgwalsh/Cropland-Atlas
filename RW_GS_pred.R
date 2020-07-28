@@ -2,10 +2,11 @@
 # M. Walsh, April 2019
 
 # Required packages
-# install.packages(c("devtools","caret","MASS","randomForest","gbm","nnet","plyr","doParallel","dismo")), dependencies=T)
+# install.packages(c("devtools","caret","mgcv","MASS","randomForest","gbm","nnet","plyr","doParallel","dismo")), dependencies=T)
 suppressPackageStartupMessages({
   require(devtools)
   require(caret)
+  require(mgcv)
   require(MASS)
   require(randomForest)
   require(gbm)
@@ -37,6 +38,9 @@ lcal <- as.vector(t(gs_cal[labs]))
 fcal <- gs_cal[,19:62]
 
 # Spatial trend model -----------------------------------------------------
+# select central place covariates
+gf_cpv <- gs_cal[,25:37]
+
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
 registerDoParallel(mc)
@@ -47,8 +51,8 @@ tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
 
 # model training
-gm <- train(CP~DX*DY, gs_cal, ## label names need to be changed manually here (BP,WP ...)
-            method = "glm",
+gm <- train(gf_cpv, lcal, 
+            method = "gam",
             preProc = c("center","scale"), 
             family = "binomial",
             metric = "ROC",
