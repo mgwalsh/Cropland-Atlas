@@ -30,8 +30,8 @@ unzip("RWA_level5.zip", overwrite = T)
 shape <- shapefile("gadm36_RWA_5.shp")
 
 # download raster stack
-download("https://www.dropbox.com/s/u2nl17rvdbkgkgx/RW_250m_2019.zip?raw=1", "RW_250m_2019.zip", mode = "wb")
-unzip("RW_250m_2019.zip", overwrite = T)
+download("https://osf.io/xts2y?raw=1", "RW_250m_2020.zip", mode = "wb")
+unzip("RW_250m_2020.zip", overwrite = T)
 glist <- list.files(pattern="tif", full.names = T)
 grids <- stack(glist)
 
