@@ -89,12 +89,12 @@ gm1 <- train(gf_cpv, lcal,
 # model outputs & predictions
 summary(gm1)
 print(gm1) ## ROC's accross cross-validation
-gm1.pred <- predict(grids, gl1, type = "prob") ## spatial predictions
+gm1.pred <- predict(grids, gm1, type = "prob") ## spatial predictions
 stopCluster(mc)
 fname <- paste("./Results/", labs, "_gm1.rds", sep = "")
 saveRDS(gm1, fname)
 
-# GLM with all covariates -------------------------------------------------
+# GLM with all covariates <MASS> -------------------------------------------
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
 registerDoParallel(mc)
@@ -105,20 +105,20 @@ tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
 
 # model training
-gl2 <- train(fcal, lcal, 
-             method = "glmStepAIC",
-             family = "binomial",
-             preProc = c("center","scale"), 
-             trControl = tc,
-             metric ="ROC")
+gl <- train(fcal, lcal, 
+            method = "glmStepAIC",
+            family = "binomial",
+            preProc = c("center","scale"), 
+            trControl = tc,
+            metric ="ROC")
 
 # model outputs & predictions
-summary(gl2)
-print(gl2) ## ROC's accross cross-validation
-gl2.pred <- predict(grids, gl2, type = "prob") ## spatial predictions
+summary(gl)
+print(gl) ## ROC's accross cross-validation
+gl.pred <- predict(grids, gl, type = "prob") ## spatial predictions
 stopCluster(mc)
-fname <- paste("./Results/", labs, "_gl2.rds", sep = "")
-saveRDS(gl2, fname)
+fname <- paste("./Results/", labs, "_gl.rds", sep = "")
+saveRDS(gl, fname)
 
 # Random forest <randomForest> --------------------------------------------
 # start doParallel to parallelize model fitting
@@ -203,8 +203,8 @@ fname <- paste("./Results/", labs, "_nn.rds", sep = "")
 saveRDS(nn, fname)
 
 # Model stacking setup ----------------------------------------------------
-preds <- stack(1-gl1.pred, 1-gl2.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
-names(preds) <- c("gl1","gl2","rf","gb","nn")
+preds <- stack(1-gm0.pred, 1-gm1, 1-gl.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
+names(preds) <- c("gm0","gm1","gl","rf","gb","nn")
 plot(preds, axes = F)
 
 # extract model predictions
