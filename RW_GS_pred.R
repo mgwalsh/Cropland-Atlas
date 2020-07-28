@@ -36,6 +36,31 @@ lcal <- as.vector(t(gs_cal[labs]))
 # raster calibration features
 fcal <- gs_cal[,19:62]
 
+# Spatial trend model -----------------------------------------------------
+# start doParallel to parallelize model fitting
+mc <- makeCluster(detectCores())
+registerDoParallel(mc)
+
+# control setup
+set.seed(1385321)
+tc <- trainControl(method = "cv", classProbs = T, 
+                   summaryFunction = twoClassSummary, allowParallel = T)
+
+# model training
+gm <- train(CP~DX*DY, gs_cal, ## label names need to be changed manually here (BP,WP ...)
+            method = "glm",
+            preProc = c("center","scale"), 
+            family = "binomial",
+            metric = "ROC",
+            trControl = tc)
+
+# model outputs & predictions
+summary(gm)
+gm.pred <- predict(grids, gm, type = "prob") ## spatial predictions
+stopCluster(mc)
+fname <- paste("./Results/", labs, "_gm.rds", sep = "")
+saveRDS(gm, fname)
+
 # Central place theory model <glm> ----------------------------------------
 # select central place covariates
 gf_cpv <- gs_cal[,25:37]
