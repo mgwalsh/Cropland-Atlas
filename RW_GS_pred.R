@@ -37,7 +37,7 @@ lcal <- as.vector(t(gs_cal[labs]))
 # raster calibration features
 fcal <- gs_cal[,19:63]
 
-# Spatial trend model -----------------------------------------------------
+# Spatial trend model <mgcv> -----------------------------------------------
 # select central place covariates
 gf_cpv <- gs_cal[,36:38]
 
@@ -67,7 +67,7 @@ saveRDS(gm0, fname)
 
 # Central place theory model <mgcv> ---------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,25:38]
+gf_cpv <- gs_cal[,25:35]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
