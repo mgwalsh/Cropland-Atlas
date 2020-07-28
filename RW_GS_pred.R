@@ -1,5 +1,5 @@
-# Stacked predictions of Rwanda GeoSurvey observations
-# M. Walsh, April 2019 (2020 grid update)
+# Stacked predictions of Rwanda GeoSurvey observations (2020 grid update)
+# M. Walsh, April 2019
 
 # Required packages
 # install.packages(c("devtools","caret","MASS","randomForest","gbm","nnet","plyr","doParallel","dismo")), dependencies=T)
