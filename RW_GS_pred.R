@@ -35,7 +35,7 @@ labs <- c("CP") ## insert other labels (BP,WP ...) here!
 lcal <- as.vector(t(gs_cal[labs]))
 
 # raster calibration features
-fcal <- gs_cal[,19:63]
+fcal <- gs_cal[,19:35,39:63]
 
 # Spatial trend model <mgcv> -----------------------------------------------
 # select central place covariates
