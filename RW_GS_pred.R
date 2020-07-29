@@ -19,7 +19,7 @@ suppressPackageStartupMessages({
 # Data setup --------------------------------------------------------------
 # Run this first: https://github.com/mgwalsh/Cropland-Atlas/blob/master/RW_GS19_data.R
 rm(list=setdiff(ls(), c("gsdat","grids","glist"))) ## scrub extraneous objects in memory
-gsdat <- gsdat[complete.cases(gsdat[ ,c(19:62)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(19:63)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -105,20 +105,20 @@ tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
 
 # model training
-gl1 <- train(fcal, lcal, 
-             method = "glmStepAIC",
-             family = "binomial",
-             preProc = c("center","scale"), 
-             trControl = tc,
-             metric ="ROC")
+gl <- train(fcal, lcal, 
+            method = "glmStepAIC",
+            family = "binomial",
+            preProc = c("center","scale"), 
+            trControl = tc,
+            metric ="ROC")
 
 # model outputs & predictions
-summary(gl1)
-print(gl1) ## ROC's accross cross-validation
-glm.pred <- predict(grids, gl1, type = "prob") ## spatial predictions
+summary(gl)
+print(gl) ## ROC's accross cross-validation
+gl.pred <- predict(grids, gl, type = "prob") ## spatial predictions
 stopCluster(mc)
-fname <- paste("./Results/", labs, "_glm.rds", sep = "")
-saveRDS(gl1, fname)
+fname <- paste("./Results/", labs, "_gl.rds", sep = "")
+saveRDS(gl, fname)
 
 # Random forest <randomForest> --------------------------------------------
 # start doParallel to parallelize model fitting
@@ -203,7 +203,7 @@ fname <- paste("./Results/", labs, "_nn.rds", sep = "")
 saveRDS(nn, fname)
 
 # Model stacking setup ----------------------------------------------------
-preds <- stack(1-gm0.pred, 1-gm1, 1-gl.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
+preds <- stack(1-gm0.pred, 1-gm1.pred, 1-gl.pred, 1-rf.pred, 1-gb.pred, 1-nn.pred)
 names(preds) <- c("gm0","gm1","gl","rf","gb","nn")
 plot(preds, axes = F)
 
@@ -216,7 +216,7 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 # stacking model validation labels and features
 gs_val <- as.data.frame(gs_val)
 lval <- as.vector(t(gs_val[labs]))
-fval <- gspred[,63:67] ## subset validation features
+fval <- gspred[,64:69] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
@@ -260,7 +260,7 @@ plot(mask, axes=F)
 
 # Write prediction grids --------------------------------------------------
 gspreds <- stack(preds, 1-st.pred, mask)
-names(gspreds) <- c("gl1","gl2","rf","gb","nn","st","mk")
+names(gspreds) <- c("gm0","gm1","gl","rf","gb","nn","st","mk")
 fname <- paste("./Results/","RW_", labs, "_preds_2020.tif", sep = "")
 writeRaster(gspreds, filename=fname, datatype="FLT4S", options="INTERLEAVE=BAND", overwrite=T)
 
