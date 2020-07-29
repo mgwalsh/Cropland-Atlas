@@ -105,20 +105,20 @@ tc <- trainControl(method = "cv", classProbs = T,
                    summaryFunction = twoClassSummary, allowParallel = T)
 
 # model training
-gl <- train(fcal, lcal, 
-            method = "glmStepAIC",
-            family = "binomial",
-            preProc = c("center","scale"), 
-            trControl = tc,
-            metric ="ROC")
+gl1 <- train(fcal, lcal, 
+             method = "glmStepAIC",
+             family = "binomial",
+             preProc = c("center","scale"), 
+             trControl = tc,
+             metric ="ROC")
 
 # model outputs & predictions
-summary(gl)
-print(gl) ## ROC's accross cross-validation
-gl.pred <- predict(grids, gl, type = "prob") ## spatial predictions
+summary(gl1)
+print(gl1) ## ROC's accross cross-validation
+glm.pred <- predict(grids, gl1, type = "prob") ## spatial predictions
 stopCluster(mc)
-fname <- paste("./Results/", labs, "_gl.rds", sep = "")
-saveRDS(gl, fname)
+fname <- paste("./Results/", labs, "_glm.rds", sep = "")
+saveRDS(gl1, fname)
 
 # Random forest <randomForest> --------------------------------------------
 # start doParallel to parallelize model fitting
