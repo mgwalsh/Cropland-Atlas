@@ -19,7 +19,7 @@ suppressPackageStartupMessages({
 # Data setup --------------------------------------------------------------
 # Run this first: https://github.com/mgwalsh/Cropland-Atlas/blob/master/RW_GS19_data.R
 rm(list=setdiff(ls(), c("gsdat","grids","glist"))) ## scrub extraneous objects in memory
-gsdat <- gsdat[complete.cases(gsdat[ ,c(19:63)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(19:66)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
@@ -35,11 +35,11 @@ labs <- c("CP") ## insert other labels (BP,WP ...) here!
 lcal <- as.vector(t(gs_cal[labs]))
 
 # raster calibration features
-fcal <- gs_cal[,19:35,39:63]
+fcal <- gs_cal[,19:38,42:66]
 
 # Spatial trend model <mgcv> -----------------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,36:38]
+gf_cpv <- gs_cal[,39:41]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -67,7 +67,7 @@ saveRDS(gm0, fname)
 
 # Central place theory model <mgcv> ---------------------------------------
 # select central place covariates
-gf_cpv <- gs_cal[,25:35]
+gf_cpv <- gs_cal[,25:38]
 
 # start doParallel to parallelize model fitting
 mc <- makeCluster(detectCores())
@@ -216,7 +216,7 @@ gspred <- as.data.frame(cbind(gs_val, gspred))
 # stacking model validation labels and features
 gs_val <- as.data.frame(gs_val)
 lval <- as.vector(t(gs_val[labs]))
-fval <- gspred[,64:69] ## subset validation features
+fval <- gspred[,67:72] ## subset validation features
 
 # Model stacking ----------------------------------------------------------
 # start doParallel to parallelize model fitting
