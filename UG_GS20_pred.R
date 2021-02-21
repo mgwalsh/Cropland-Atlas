@@ -17,7 +17,7 @@ suppressPackageStartupMessages({
 
 # Data setup --------------------------------------------------------------
 rm(list=setdiff(ls(), c("gsdat","grids","glist"))) ## scrub extraneous objects in memory
-gsdat <- gsdat[complete.cases(gsdat[ ,c(10:12,18:65)]),] ## removes incomplete cases
+gsdat <- gsdat[complete.cases(gsdat[ ,c(10:13, 18:65)]),] ## removes incomplete cases
 
 # set calibration/validation set randomization seed
 seed <- 12358
